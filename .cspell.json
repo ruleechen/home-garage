@@ -1,0 +1,20 @@
+{
+  "version": "0.2",
+  "words": [
+    "rulee",
+    "chen",
+    "platformio",
+    "espressif",
+    "littlefs",
+    "gpio",
+    "millis",
+    "timespan",
+    "println",
+    "wifi",
+    "ssid",
+    "rssi",
+    "mDNS",
+    "mithril",
+    "oninit"
+  ]
+}
