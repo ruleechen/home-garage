@@ -9,7 +9,7 @@
 #include <VictorWeb.h>
 
 #include "ServiceStorage.h"
-#include "DoorSense.h"
+#include "DoorSenser.h"
 
 using namespace Victor;
 using namespace Victor::Components;
@@ -22,7 +22,7 @@ BuiltinLed* builtinLed;
 VictorRadio radioPortal;
 VictorWeb webPortal(80);
 RCSwitch mySwitch = RCSwitch();
-DoorSense* doorSense;
+DoorSenser* doorSenser;
 
 void targetDoorStateSetter(const homekit_value_t value) {
 	targetDoorState.value.int_value = value.int_value;
@@ -84,8 +84,8 @@ void setup(void) {
   arduino_homekit_setup(&config);
 
   auto serviceJson = serviceStorage.load();
-  doorSense = new DoorSense(serviceJson);
-  doorSense->onStateChange = setCurrentDoorState;
+  doorSenser = new DoorSenser(serviceJson);
+  doorSenser->onStateChange = setCurrentDoorState;
 
   builtinLed->flash();
   console.log(F("setup complete"));
@@ -93,7 +93,7 @@ void setup(void) {
 
 void loop(void) {
   webPortal.loop();
-  doorSense->loop();
+  doorSenser->loop();
   arduino_homekit_loop();
   if (mySwitch.available()) {
     auto value = String(mySwitch.getReceivedValue());

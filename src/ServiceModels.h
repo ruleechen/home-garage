@@ -16,10 +16,10 @@ namespace Victor {
   };
 
   struct ServiceModel {
-    int8_t openSensePin = -1;
-    int8_t closeSensePin = -1;
+    int8_t openSenserPin = -1;
+    int8_t closedSenserPin = -1;
     uint8_t openTrueValue = 0;  // LOW
-    uint8_t closeTrueValue = 0; // LOW
+    uint8_t closedTrueValue = 0; // LOW
   };
 
 } // namespace Victor
