@@ -1,19 +1,50 @@
 #include <Arduino.h>
 #include <RCSwitch.h>
+#include <arduino_homekit_server.h>
 
-#include "BuiltinLed.h"
-#include "VictorOTA.h"
-#include "VictorWifi.h"
-#include "VictorRadio.h"
-#include "VictorWeb.h"
+#include <BuiltinLed.h>
+#include <VictorOTA.h>
+#include <VictorWifi.h>
+#include <VictorRadio.h>
+#include <VictorWeb.h>
+
+#include "ServiceStorage.h"
+#include "DoorSense.h"
 
 using namespace Victor;
 using namespace Victor::Components;
+
+extern "C" homekit_server_config_t config;
+extern "C" homekit_characteristic_t targetDoorState;
+extern "C" homekit_characteristic_t currentDoorState;
 
 BuiltinLed* builtinLed;
 VictorRadio radioPortal;
 VictorWeb webPortal(80);
 RCSwitch mySwitch = RCSwitch();
+DoorSense* doorSense;
+
+void targetDoorStateSetter(const homekit_value_t value) {
+	targetDoorState.value.int_value = value.int_value;
+  auto state = DoorState(value.int_value);
+	if (state == DoorStateOpen) {
+    radioPortal.emit("open");
+    builtinLed->turnOn();
+	} else {
+    radioPortal.emit("close");
+		builtinLed->turnOff();
+	}
+  console.log().bracket("TargetState").section(String(state));
+}
+
+void setCurrentDoorState(DoorState state) {
+	currentDoorState.value.int_value = state;
+	homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
+  if (state == DoorStateClosed || state == DoorStateOpen) {
+    radioPortal.emit("stop");
+  }
+  console.log().bracket("CurrentState").section(String(state));
+}
 
 void setup(void) {
   console.begin(115200);
@@ -49,12 +80,21 @@ void setup(void) {
   webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
   webPortal.setup();
 
+  targetDoorState.setter = targetDoorStateSetter;
+  arduino_homekit_setup(&config);
+
+  auto serviceJson = serviceStorage.load();
+  doorSense = new DoorSense(serviceJson);
+  doorSense->onStateChange = setCurrentDoorState;
+
   builtinLed->flash();
   console.log(F("setup complete"));
 }
 
 void loop(void) {
   webPortal.loop();
+  doorSense->loop();
+  arduino_homekit_loop();
   if (mySwitch.available()) {
     auto value = String(mySwitch.getReceivedValue());
     auto channel = mySwitch.getReceivedProtocol();
