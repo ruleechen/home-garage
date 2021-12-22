@@ -14,9 +14,10 @@
 using namespace Victor;
 using namespace Victor::Components;
 
-extern "C" homekit_server_config_t config;
+extern "C" homekit_characteristic_t chaName;
 extern "C" homekit_characteristic_t targetDoorState;
 extern "C" homekit_characteristic_t currentDoorState;
+extern "C" homekit_server_config_t config;
 
 BuiltinLed* builtinLed;
 VictorRadio radioPortal;
@@ -60,6 +61,7 @@ void setup(void) {
   victorOTA.setup();
   victorWifi.setup();
 
+  // setup radio
   auto radioJson = radioStorage.load();
   if (radioJson.inputPin > 0) {
 	  mySwitch.enableReceive(radioJson.inputPin);
@@ -67,7 +69,6 @@ void setup(void) {
   if (radioJson.outputPin > 0) {
     mySwitch.enableTransmit(radioJson.outputPin);
   }
-
   radioPortal.onEmit = [](const RadioEmit& emit) {
     auto value = emit.value.toInt();
     mySwitch.send(value, 24);
@@ -77,19 +78,25 @@ void setup(void) {
       .section(F("via channel")).section(String(emit.channel));
   };
 
+  // setup web
   webPortal.onRequestStart = []() { builtinLed->turnOn(); };
   webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
   webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
   webPortal.setup();
 
+  // setup homekit server
+  auto hostName = victorWifi.getLocalHostName();
+  chaName.value.string_value = const_cast<char*>(hostName.c_str());
   targetDoorState.setter = targetDoorStateSetter;
   arduino_homekit_setup(&config);
 
+  // setup door sensor
   auto doorJson = doorStorage.load();
   doorSenser = new DoorSenser(doorJson);
   doorSenser->onStateChange = setCurrentDoorState;
   setCurrentDoorState(doorSenser->readState());
 
+  // done
   builtinLed->flash();
   console.log(F("setup complete"));
 }

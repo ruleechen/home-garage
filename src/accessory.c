@@ -8,7 +8,7 @@ void my_accessory_identify(homekit_value_t _value) {
 homekit_characteristic_t targetDoorState = HOMEKIT_CHARACTERISTIC_(TARGET_DOOR_STATE, 0);
 homekit_characteristic_t currentDoorState = HOMEKIT_CHARACTERISTIC_(CURRENT_DOOR_STATE, 0);
 // homekit_characteristic_t cha_obstruction_detection = HOMEKIT_CHARACTERISTIC_(OBSTRUCTION_DETECTION, false);
-homekit_characteristic_t cha_name = HOMEKIT_CHARACTERISTIC_(NAME, HOMEKIT_CHARACTERISTIC_NAME);
+homekit_characteristic_t chaName = HOMEKIT_CHARACTERISTIC_(NAME, HOMEKIT_CHARACTERISTIC_NAME);
 
 homekit_accessory_t *accessories[] = {
   HOMEKIT_ACCESSORY(.id=1, .category=homekit_accessory_category_garage, .services=(homekit_service_t*[]) {
@@ -25,7 +25,7 @@ homekit_accessory_t *accessories[] = {
       &targetDoorState,
       &currentDoorState,
       // &cha_obstruction_detection,
-      &cha_name,
+      &chaName,
       NULL
     }),
     NULL
