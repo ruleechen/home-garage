@@ -9,6 +9,7 @@ namespace Victor::Components {
    public:
     DoorSenser(DoorSetting model);
     void loop();
+    DoorState readState();
     // events
     typedef std::function<void(DoorState state)> TStateHandler;
     TStateHandler onStateChange;
@@ -18,7 +19,6 @@ namespace Victor::Components {
     DigitalInput* _closedSenser;
     DoorState _lastState = DoorStateUnknown;
     unsigned long _lastLoop;
-    DoorState _readState();
   };
 
 } // namespace Victor::Components

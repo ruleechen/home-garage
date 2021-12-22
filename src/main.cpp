@@ -40,7 +40,9 @@ void targetDoorStateSetter(const homekit_value_t value) {
 void setCurrentDoorState(DoorState state) {
 	currentDoorState.value.int_value = state;
 	homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
-  if (state == DoorStateClosed || state == DoorStateOpen) {
+  if (state == DoorStateOpen || state == DoorStateClosed) {
+    targetDoorState.value.int_value = state;
+    homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     radioPortal.emit("stop");
   }
   console.log().bracket("CurrentState").section(String(state));
@@ -86,6 +88,7 @@ void setup(void) {
   auto doorJson = doorStorage.load();
   doorSenser = new DoorSenser(doorJson);
   doorSenser->onStateChange = setCurrentDoorState;
+  setCurrentDoorState(doorSenser->readState());
 
   builtinLed->flash();
   console.log(F("setup complete"));

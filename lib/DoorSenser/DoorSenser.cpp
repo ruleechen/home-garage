@@ -5,14 +5,14 @@ namespace Victor::Components {
   DoorSenser::DoorSenser(DoorSetting model) {
     _openSenser = new DigitalInput(model.openSenserPin, model.openTrueValue);
     _closedSenser = new DigitalInput(model.closedSenserPin, model.closedTrueValue);
-    _lastState = _readState();
+    _lastState = readState();
   }
 
   void DoorSenser::loop() {
     auto now = millis();
     if (now - _lastLoop > 1000) {
       _lastLoop = now;
-      auto state = _readState();
+      auto state = readState();
       if (state != _lastState) {
         _lastState = state;
         if (onStateChange) {
@@ -22,7 +22,7 @@ namespace Victor::Components {
     }
   }
 
-  DoorState DoorSenser::_readState() {
+  DoorState DoorSenser::readState() {
     DoorState state = _lastState;
     if (_openSenser->getValue()) {
       state = DoorStateOpen;
