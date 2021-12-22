@@ -2,12 +2,12 @@
 #define DoorSenser_h
 
 #include <DigitalInput.h>
-#include "ServiceModels.h"
+#include "DoorModels.h"
 
 namespace Victor::Components {
   class DoorSenser {
    public:
-    DoorSenser(ServiceModel model);
+    DoorSenser(DoorSetting model);
     void loop();
     // events
     typedef std::function<void(DoorState state)> TStateHandler;

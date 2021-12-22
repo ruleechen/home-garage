@@ -1,5 +1,5 @@
-#ifndef ServiceModels_h
-#define ServiceModels_h
+#ifndef DoorModels_h
+#define DoorModels_h
 
 #include <map>
 #include <Arduino.h>
@@ -15,7 +15,7 @@ namespace Victor {
     DoorStateUnknown = 255,
   };
 
-  struct ServiceModel {
+  struct DoorSetting {
     int8_t openSenserPin = -1;
     int8_t closedSenserPin = -1;
     uint8_t openTrueValue = 0;  // LOW
@@ -24,4 +24,4 @@ namespace Victor {
 
 } // namespace Victor
 
-#endif // ServiceModels_h
+#endif // DoorModels_h

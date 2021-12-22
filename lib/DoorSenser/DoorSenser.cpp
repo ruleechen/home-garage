@@ -2,7 +2,7 @@
 
 namespace Victor::Components {
 
-  DoorSenser::DoorSenser(ServiceModel model) {
+  DoorSenser::DoorSenser(DoorSetting model) {
     _openSenser = new DigitalInput(model.openSenserPin, model.openTrueValue);
     _closedSenser = new DigitalInput(model.closedSenserPin, model.closedTrueValue);
     _lastState = _readState();

@@ -8,7 +8,7 @@
 #include <VictorRadio.h>
 #include <VictorWeb.h>
 
-#include "ServiceStorage.h"
+#include "DoorStorage.h"
 #include "DoorSenser.h"
 
 using namespace Victor;
@@ -83,8 +83,8 @@ void setup(void) {
   targetDoorState.setter = targetDoorStateSetter;
   arduino_homekit_setup(&config);
 
-  auto serviceJson = serviceStorage.load();
-  doorSenser = new DoorSenser(serviceJson);
+  auto doorJson = doorStorage.load();
+  doorSenser = new DoorSenser(doorJson);
   doorSenser->onStateChange = setCurrentDoorState;
 
   builtinLed->flash();

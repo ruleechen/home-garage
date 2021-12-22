@@ -1,13 +1,13 @@
-#include "ServiceStorage.h"
+#include "DoorStorage.h"
 
 namespace Victor::Components {
 
-  ServiceStorage::ServiceStorage() {
-    _filePath = F("/service.json");
+  DoorStorage::DoorStorage() {
+    _filePath = F("/door.json");
     _maxSize = 512;
   }
 
-  void ServiceStorage::_serializeTo(const ServiceModel& model, DynamicJsonDocument& doc) {
+  void DoorStorage::_serializeTo(const DoorSetting& model, DynamicJsonDocument& doc) {
     JsonArray item = doc.createNestedArray(F("s"));
     item[0] = model.openSenserPin;
     item[1] = model.closedSenserPin;
@@ -15,7 +15,7 @@ namespace Victor::Components {
     item[3] = model.closedTrueValue;
   }
 
-  void ServiceStorage::_deserializeFrom(ServiceModel& model, const DynamicJsonDocument& doc) {
+  void DoorStorage::_deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) {
     auto item = doc[F("s")];
     model.openSenserPin = item[0];
     model.closedSenserPin = item[1];
@@ -24,6 +24,6 @@ namespace Victor::Components {
   }
 
   // global
-  ServiceStorage serviceStorage;
+  DoorStorage doorStorage;
 
 } // namespace Victor::Components
