@@ -24,6 +24,7 @@ VictorRadio radioPortal;
 VictorWeb webPortal(80);
 RCSwitch mySwitch = RCSwitch();
 DoorSenser* doorSenser;
+String hostName;
 
 void targetDoorStateSetter(const homekit_value_t value) {
 	targetDoorState.value.int_value = value.int_value;
@@ -85,7 +86,7 @@ void setup(void) {
   webPortal.setup();
 
   // setup homekit server
-  auto hostName = victorWifi.getHostName();
+  hostName = victorWifi.getHostName();
   chaName.value.string_value = const_cast<char*>(hostName.c_str());
   targetDoorState.setter = targetDoorStateSetter;
   arduino_homekit_setup(&config);
