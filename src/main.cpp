@@ -85,7 +85,7 @@ void setup(void) {
   webPortal.setup();
 
   // setup homekit server
-  auto hostName = victorWifi.getLocalHostName();
+  auto hostName = victorWifi.getHostName();
   chaName.value.string_value = const_cast<char*>(hostName.c_str());
   targetDoorState.setter = targetDoorStateSetter;
   arduino_homekit_setup(&config);
