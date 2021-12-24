@@ -8,7 +8,7 @@ namespace Victor::Components {
   }
 
   void DoorStorage::_serializeTo(const DoorSetting& model, DynamicJsonDocument& doc) {
-    JsonArray item = doc.createNestedArray(F("s"));
+    const JsonArray item = doc.createNestedArray(F("s"));
     item[0] = model.openSenserPin;
     item[1] = model.closedSenserPin;
     item[2] = model.openTrueValue;
@@ -16,7 +16,7 @@ namespace Victor::Components {
   }
 
   void DoorStorage::_deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) {
-    auto item = doc[F("s")];
+    const auto item = doc[F("s")];
     model.openSenserPin = item[0];
     model.closedSenserPin = item[1];
     model.openTrueValue = item[2];

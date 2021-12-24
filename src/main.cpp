@@ -28,7 +28,7 @@ String hostName;
 
 void targetDoorStateSetter(const homekit_value_t value) {
   targetDoorState.value.int_value = value.int_value;
-  auto state = DoorState(value.int_value);
+  const auto state = DoorState(value.int_value);
   if (state == DoorStateOpen) {
     radioPortal.emit(F("open"));
     builtinLed->turnOn();
@@ -65,7 +65,7 @@ void setup(void) {
   victorWifi.setup();
 
   // setup radio
-  auto radioJson = radioStorage.load();
+  const auto radioJson = radioStorage.load();
   if (radioJson.inputPin > 0) {
     mySwitch.enableReceive(radioJson.inputPin);
   }
@@ -73,7 +73,7 @@ void setup(void) {
     mySwitch.enableTransmit(radioJson.outputPin);
   }
   radioPortal.onEmit = [](const RadioEmit& emit) {
-    auto value = emit.value.toInt();
+    const auto value = emit.value.toInt();
     mySwitch.send(value, 24);
     builtinLed->flash();
     console.log().bracket(F("radio"))
@@ -94,7 +94,7 @@ void setup(void) {
   arduino_homekit_setup(&config);
 
   // setup door sensor
-  auto doorJson = doorStorage.load();
+  const auto doorJson = doorStorage.load();
   doorSenser = new DoorSenser(doorJson);
   doorSenser->onStateChange = setCurrentDoorState;
   setCurrentDoorState(doorSenser->readState());
@@ -109,8 +109,8 @@ void loop(void) {
   doorSenser->loop();
   arduino_homekit_loop();
   if (mySwitch.available()) {
-    auto value = String(mySwitch.getReceivedValue());
-    auto channel = mySwitch.getReceivedProtocol();
+    const auto value = String(mySwitch.getReceivedValue());
+    const auto channel = mySwitch.getReceivedProtocol();
     radioPortal.receive(value, channel);
     builtinLed->flash();
     console.log().bracket(F("radio"))

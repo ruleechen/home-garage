@@ -9,10 +9,10 @@ namespace Victor::Components {
   }
 
   void DoorSenser::loop() {
-    auto now = millis();
+    const auto now = millis();
     if (now - _lastLoop > 1000) {
       _lastLoop = now;
-      auto state = readState();
+      const auto state = readState();
       if (state != _lastState) {
         _lastState = state;
         if (onStateChange) {
@@ -23,7 +23,7 @@ namespace Victor::Components {
   }
 
   DoorState DoorSenser::readState() {
-    DoorState state = _lastState;
+    auto state = _lastState;
     if (_openSenser->getValue()) {
       state = DoorStateOpen;
     } else if (_closedSenser->getValue()) {
