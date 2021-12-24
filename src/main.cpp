@@ -27,27 +27,29 @@ DoorSenser* doorSenser;
 String hostName;
 
 void targetDoorStateSetter(const homekit_value_t value) {
-	targetDoorState.value.int_value = value.int_value;
+  targetDoorState.value.int_value = value.int_value;
   auto state = DoorState(value.int_value);
-	if (state == DoorStateOpen) {
-    radioPortal.emit("open");
+  if (state == DoorStateOpen) {
+    radioPortal.emit(F("open"));
     builtinLed->turnOn();
-	} else {
-    radioPortal.emit("close");
-		builtinLed->turnOff();
-	}
-  console.log().bracket("TargetState").section(String(state));
+  } else {
+    radioPortal.emit(F("close"));
+    builtinLed->turnOff();
+  }
+  console.log().bracket(F("door")).section(F("target"), String(state));
 }
 
 void setCurrentDoorState(DoorState state) {
-	currentDoorState.value.int_value = state;
-	homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
   if (state == DoorStateOpen || state == DoorStateClosed) {
     targetDoorState.value.int_value = state;
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
-    radioPortal.emit("stop");
   }
-  console.log().bracket("CurrentState").section(String(state));
+  currentDoorState.value.int_value = state;
+  homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
+  if (state == DoorStateOpen || state == DoorStateClosed) {
+    radioPortal.emit(F("stop"));
+  }
+  console.log().bracket("door").section(F("current"), String(state));
 }
 
 void setup(void) {
@@ -65,7 +67,7 @@ void setup(void) {
   // setup radio
   auto radioJson = radioStorage.load();
   if (radioJson.inputPin > 0) {
-	  mySwitch.enableReceive(radioJson.inputPin);
+    mySwitch.enableReceive(radioJson.inputPin);
   }
   if (radioJson.outputPin > 0) {
     mySwitch.enableTransmit(radioJson.outputPin);
@@ -75,8 +77,8 @@ void setup(void) {
     mySwitch.send(value, 24);
     builtinLed->flash();
     console.log().bracket(F("radio"))
-      .section(F("sent")).section(emit.value)
-      .section(F("via channel")).section(String(emit.channel));
+      .section(F("sent"), emit.value)
+      .section(F("via channel"), String(emit.channel));
   };
 
   // setup web
@@ -112,8 +114,8 @@ void loop(void) {
     radioPortal.receive(value, channel);
     builtinLed->flash();
     console.log().bracket(F("radio"))
-      .section(F("received")).section(value)
-      .section(F("from channel")).section(String(channel));
+      .section(F("received"), value)
+      .section(F("from channel"), String(channel));
     mySwitch.resetAvailable();
   }
 }
