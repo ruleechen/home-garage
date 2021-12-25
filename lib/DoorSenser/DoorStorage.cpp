@@ -8,19 +8,19 @@ namespace Victor::Components {
   }
 
   void DoorStorage::_serializeTo(const DoorSetting& model, DynamicJsonDocument& doc) {
-    const JsonArray item = doc.createNestedArray(F("s"));
-    item[0] = model.openSenserPin;
-    item[1] = model.closedSenserPin;
-    item[2] = model.openTrueValue;
-    item[3] = model.closedTrueValue;
+    const JsonArray setting = doc.createNestedArray(F("s"));
+    setting[0] = model.openSenserPin;
+    setting[1] = model.closedSenserPin;
+    setting[2] = model.openTrueValue;
+    setting[3] = model.closedTrueValue;
   }
 
   void DoorStorage::_deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) {
-    const auto item = doc[F("s")];
-    model.openSenserPin = item[0];
-    model.closedSenserPin = item[1];
-    model.openTrueValue = item[2];
-    model.closedTrueValue = item[3];
+    const auto setting = doc[F("s")];
+    model.openSenserPin = setting[0];
+    model.closedSenserPin = setting[1];
+    model.openTrueValue = setting[2];
+    model.closedTrueValue = setting[3];
   }
 
   // global

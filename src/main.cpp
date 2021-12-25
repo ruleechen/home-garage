@@ -14,10 +14,10 @@
 using namespace Victor;
 using namespace Victor::Components;
 
-extern "C" homekit_characteristic_t chaName;
+extern "C" homekit_characteristic_t doorName;
 extern "C" homekit_characteristic_t targetDoorState;
 extern "C" homekit_characteristic_t currentDoorState;
-extern "C" homekit_server_config_t config;
+extern "C" homekit_server_config_t doorConfig;
 
 BuiltinLed* builtinLed;
 VictorRadio radioPortal;
@@ -25,6 +25,15 @@ VictorWeb webPortal(80);
 RCSwitch mySwitch = RCSwitch();
 DoorSenser* doorSenser;
 String hostName;
+
+String parseStateName(int state) {
+  return state == DoorStateOpen ? "Open"
+    : state == DoorStateClosed ? "Closed"
+    : state == DoorStateOpening ? "Opening"
+    : state == DoorStateClosing ? "Closing"
+    : state == DoorStateStopped ? "Stopped"
+    : "Unknown";
+}
 
 void targetDoorStateSetter(const homekit_value_t value) {
   targetDoorState.value.int_value = value.int_value;
@@ -36,7 +45,7 @@ void targetDoorStateSetter(const homekit_value_t value) {
     radioPortal.emit(F("close"));
     builtinLed->turnOff();
   }
-  console.log().bracket(F("door")).section(F("target"), String(state));
+  console.log().bracket(F("door")).section(F("target"), parseStateName(state));
 }
 
 void setCurrentDoorState(DoorState state) {
@@ -49,7 +58,7 @@ void setCurrentDoorState(DoorState state) {
   if (state == DoorStateOpen || state == DoorStateClosed) {
     radioPortal.emit(F("stop"));
   }
-  console.log().bracket("door").section(F("current"), String(state));
+  console.log().bracket("door").section(F("current"), parseStateName(state));
 }
 
 void setup(void) {
@@ -85,13 +94,20 @@ void setup(void) {
   webPortal.onRequestStart = []() { builtinLed->turnOn(); };
   webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
   webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
+  webPortal.onResetService = []() { homekit_server_reset(); };
+  webPortal.onGetServiceState = [](std::vector<KeyValueModel>& items) {
+    const auto stateName = parseStateName(currentDoorState.value.int_value);
+    const auto count = arduino_homekit_connected_clients_count();
+    items.push_back({ .key = "Door", .value = stateName });
+    items.push_back({ .key = "Clients", .value = String(count) });
+  };
   webPortal.setup();
 
   // setup homekit server
   hostName = victorWifi.getHostName();
-  chaName.value.string_value = const_cast<char*>(hostName.c_str());
+  doorName.value.string_value = const_cast<char*>(hostName.c_str());
   targetDoorState.setter = targetDoorStateSetter;
-  arduino_homekit_setup(&config);
+  arduino_homekit_setup(&doorConfig);
 
   // setup door sensor
   const auto doorJson = doorStorage.load();
@@ -108,6 +124,7 @@ void loop(void) {
   webPortal.loop();
   doorSenser->loop();
   arduino_homekit_loop();
+  // loop radio
   if (mySwitch.available()) {
     const auto value = String(mySwitch.getReceivedValue());
     const auto channel = mySwitch.getReceivedProtocol();
