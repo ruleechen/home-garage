@@ -14,10 +14,10 @@
 using namespace Victor;
 using namespace Victor::Components;
 
-extern "C" homekit_characteristic_t doorName;
 extern "C" homekit_characteristic_t targetDoorState;
 extern "C" homekit_characteristic_t currentDoorState;
-extern "C" homekit_server_config_t doorConfig;
+extern "C" homekit_characteristic_t accessoryName;
+extern "C" homekit_server_config_t serverConfig;
 
 BuiltinLed* builtinLed;
 VictorRadio radioPortal;
@@ -105,9 +105,9 @@ void setup(void) {
 
   // setup homekit server
   hostName = victorWifi.getHostName();
-  doorName.value.string_value = const_cast<char*>(hostName.c_str());
+  accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
   targetDoorState.setter = targetDoorStateSetter;
-  arduino_homekit_setup(&doorConfig);
+  arduino_homekit_setup(&serverConfig);
 
   // setup door sensor
   const auto doorJson = doorStorage.load();
