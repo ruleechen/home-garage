@@ -104,7 +104,7 @@ void setup(void) {
 
   // setup homekit server
   hostName = victorWifi.getHostName();
-  strcpy(accessoryName.value.string_value, &hostName[0]);
+  accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
   targetDoorState.setter = targetDoorStateSetter;
   arduino_homekit_setup(&serverConfig);
 
