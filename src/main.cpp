@@ -70,9 +70,6 @@ void setup(void) {
   builtinLed = new BuiltinLed();
   builtinLed->turnOn();
 
-  victorOTA.setup();
-  victorWifi.setup();
-
   // setup radio
   const auto radioJson = radioStorage.load();
   if (radioJson.inputPin > 0) {
@@ -113,6 +110,10 @@ void setup(void) {
   doorSenser = new DoorSenser(doorJson);
   doorSenser->onStateChange = setCurrentDoorState;
   setCurrentDoorState(doorSenser->readState());
+
+  // setup wifi
+  victorOTA.setup();
+  victorWifi.setup();
 
   // done
   builtinLed->flash();
