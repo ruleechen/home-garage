@@ -1,7 +1,6 @@
 #ifndef DoorModels_h
 #define DoorModels_h
 
-#include <map>
 #include <Arduino.h>
 
 namespace Victor {
