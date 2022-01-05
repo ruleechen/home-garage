@@ -19,7 +19,6 @@ extern "C" homekit_characteristic_t currentDoorState;
 extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_server_config_t serverConfig;
 
-BuiltinLed* builtinLed;
 VictorRadio radioPortal;
 VictorWeb webPortal(80);
 RCSwitch mySwitch = RCSwitch();
@@ -40,12 +39,14 @@ void targetDoorStateSetter(const homekit_value_t value) {
   const auto state = DoorState(value.int_value);
   if (state == DoorStateOpen) {
     radioPortal.emit(F("open"));
-    builtinLed->turnOn();
+    builtinLed.turnOn();
   } else {
     radioPortal.emit(F("close"));
-    builtinLed->turnOff();
+    builtinLed.turnOff();
   }
-  console.log().bracket(F("door")).section(F("target"), parseStateName(state));
+  console.log()
+    .bracket(F("door"))
+    .section(F("target"), parseStateName(state));
 }
 
 void setCurrentDoorState(DoorState state) {
@@ -58,7 +59,9 @@ void setCurrentDoorState(DoorState state) {
   if (state == DoorStateOpen || state == DoorStateClosed) {
     radioPortal.emit(F("stop"));
   }
-  console.log().bracket("door").section(F("current"), parseStateName(state));
+  console.log()
+    .bracket("door")
+    .section(F("current"), parseStateName(state));
 }
 
 void setup(void) {
@@ -67,8 +70,8 @@ void setup(void) {
     console.error(F("fs mount failed"));
   }
 
-  builtinLed = new BuiltinLed();
-  builtinLed->turnOn();
+  builtinLed.setup();
+  builtinLed.turnOn();
 
   // setup radio
   const auto radioJson = radioStorage.load();
@@ -81,15 +84,16 @@ void setup(void) {
   radioPortal.onEmit = [](const RadioEmit& emit) {
     const auto value = emit.value.toInt();
     mySwitch.send(value, 24);
-    builtinLed->flash();
-    console.log().bracket(F("radio"))
+    builtinLed.flash();
+    console.log()
+      .bracket(F("radio"))
       .section(F("sent"), emit.value)
       .section(F("via channel"), String(emit.channel));
   };
 
   // setup web
-  webPortal.onRequestStart = []() { builtinLed->turnOn(); };
-  webPortal.onRequestEnd = []() { builtinLed->turnOff(); };
+  webPortal.onRequestStart = []() { builtinLed.turnOn(); };
+  webPortal.onRequestEnd = []() { builtinLed.turnOff(); };
   webPortal.onRadioEmit = [](int index) { radioPortal.emit(index); };
   webPortal.onResetService = []() { homekit_server_reset(); };
   webPortal.onGetServiceState = [](std::vector<KeyValueModel>& items) {
@@ -116,7 +120,6 @@ void setup(void) {
   victorWifi.setup();
 
   // done
-  builtinLed->flash();
   console.log(F("setup complete"));
 }
 
@@ -129,8 +132,9 @@ void loop(void) {
     const auto value = String(mySwitch.getReceivedValue());
     const auto channel = mySwitch.getReceivedProtocol();
     radioPortal.receive(value, channel);
-    builtinLed->flash();
-    console.log().bracket(F("radio"))
+    builtinLed.flash();
+    console.log()
+      .bracket(F("radio"))
       .section(F("received"), value)
       .section(F("from channel"), String(channel));
     mySwitch.resetAvailable();
