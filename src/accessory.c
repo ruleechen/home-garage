@@ -28,7 +28,7 @@ homekit_service_t informationService = HOMEKIT_SERVICE_(
 
 homekit_characteristic_t targetDoorState = HOMEKIT_CHARACTERISTIC_(TARGET_DOOR_STATE, 0);
 homekit_characteristic_t currentDoorState = HOMEKIT_CHARACTERISTIC_(CURRENT_DOOR_STATE, 0);
-// homekit_characteristic_t cha_obstruction_detection = HOMEKIT_CHARACTERISTIC_(OBSTRUCTION_DETECTION, false);
+homekit_characteristic_t obstructionState = HOMEKIT_CHARACTERISTIC_(OBSTRUCTION_DETECTED, false);
 
 homekit_service_t stateService = HOMEKIT_SERVICE_(
   GARAGE_DOOR_OPENER,
@@ -36,7 +36,7 @@ homekit_service_t stateService = HOMEKIT_SERVICE_(
   .characteristics = (homekit_characteristic_t*[]) {
     &targetDoorState,
     &currentDoorState,
-    // &cha_obstruction_detection,
+    &obstructionState,
     NULL,
   },
 );

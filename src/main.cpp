@@ -16,6 +16,7 @@ using namespace Victor::Components;
 
 extern "C" homekit_characteristic_t targetDoorState;
 extern "C" homekit_characteristic_t currentDoorState;
+extern "C" homekit_characteristic_t obstructionState;
 extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_server_config_t serverConfig;
 
