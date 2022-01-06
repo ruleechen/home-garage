@@ -8,6 +8,13 @@ namespace Victor::Components {
     _lastState = readState();
   }
 
+  DoorSenser::~DoorSenser() {
+    delete _openSenser;
+    _openSenser = NULL;
+    delete _closedSenser;
+    _closedSenser = NULL;
+  }
+
   void DoorSenser::loop() {
     const auto now = millis();
     if (now - _lastLoop > 1000) {

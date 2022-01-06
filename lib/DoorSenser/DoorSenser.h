@@ -8,6 +8,7 @@ namespace Victor::Components {
   class DoorSenser {
    public:
     DoorSenser(DoorSetting model);
+    ~DoorSenser();
     void loop();
     DoorState readState();
     // events
@@ -18,7 +19,7 @@ namespace Victor::Components {
     DigitalInput* _openSenser;
     DigitalInput* _closedSenser;
     DoorState _lastState = DoorStateUnknown;
-    unsigned long _lastLoop;
+    unsigned long _lastLoop = 0;
   };
 
 } // namespace Victor::Components
