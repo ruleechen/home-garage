@@ -101,6 +101,7 @@ void setup(void) {
   webPortal.onGetServiceState = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = "Service", .value = VICTOR_ACCESSORY_SERVICE_NAME });
     items.push_back({ .key = "State", .value = parseStateName(currentDoorState.value.int_value) });
+    items.push_back({ .key = "Paired", .value = homekit_is_paired() ? "Yes" : "No" });
     items.push_back({ .key = "Clients", .value = String(arduino_homekit_connected_clients_count()) });
   };
   webPortal.setup();
