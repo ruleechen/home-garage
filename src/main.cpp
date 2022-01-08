@@ -105,17 +105,17 @@ void setup(void) {
   };
   webPortal.setup();
 
-  // setup homekit server
-  hostName = victorWifi.getHostName();
-  accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
-  targetDoorState.setter = targetDoorStateSetter;
-  arduino_homekit_setup(&serverConfig);
-
   // setup door sensor
   const auto doorJson = doorStorage.load();
   doorSenser = new DoorSenser(doorJson);
   doorSenser->onStateChange = setCurrentDoorState;
   setCurrentDoorState(doorSenser->readState());
+
+  // setup homekit server
+  hostName = victorWifi.getHostName();
+  accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
+  targetDoorState.setter = targetDoorStateSetter;
+  arduino_homekit_setup(&serverConfig);
 
   // setup wifi
   victorOTA.setup();
