@@ -13,11 +13,11 @@ namespace Victor::Components {
     DoorState readState();
     // events
     typedef std::function<void(DoorState state)> TStateHandler;
-    TStateHandler onStateChange;
+    TStateHandler onStateChange = nullptr;
 
    private:
-    DigitalInput* _openSenser;
-    DigitalInput* _closedSenser;
+    DigitalInput* _openSenser = nullptr;
+    DigitalInput* _closedSenser = nullptr;
     DoorState _lastState = DoorStateUnknown;
     unsigned long _lastLoop = 0;
   };
