@@ -1,5 +1,13 @@
 #include "DoorSenser.h"
 
+#ifndef DOORSENSER_INTERVAL
+#define DOORSENSER_INTERVAL 250
+#endif
+
+#ifndef DOORSENSER_DEBOUNCE
+#define DOORSENSER_DEBOUNCE 3000
+#endif
+
 namespace Victor::Components {
 
   DoorSenser::DoorSenser(DoorSetting model) {
@@ -17,11 +25,15 @@ namespace Victor::Components {
 
   void DoorSenser::loop() {
     const auto now = millis();
-    if (now - _lastLoop > 1000) {
+    if (
+      now - _lastLoop > DOORSENSER_INTERVAL &&
+      now - _lastChange > DOORSENSER_DEBOUNCE
+    ) {
       _lastLoop = now;
       const auto state = readState();
       if (state != _lastState) {
         _lastState = state;
+        _lastChange = now;
         if (onStateChange) {
           onStateChange(state);
         }

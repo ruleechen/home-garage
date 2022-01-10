@@ -20,6 +20,7 @@ namespace Victor::Components {
     DigitalInput* _closedSenser = nullptr;
     DoorState _lastState = DoorStateStopped;
     unsigned long _lastLoop = 0;
+    unsigned long _lastChange = 0;
   };
 
 } // namespace Victor::Components
