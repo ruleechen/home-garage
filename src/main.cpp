@@ -51,15 +51,17 @@ void targetDoorStateSetter(const homekit_value_t value) {
     .section(F("target"), parseStateName(state));
 }
 
-void setCurrentDoorState(DoorState state) {
+void setCurrentDoorState(DoorState state, bool notify) {
+  currentDoorState.value.int_value = state;
+  if (notify) {
+    homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
+  }
   if (state == DoorStateOpen || state == DoorStateClosed) {
     targetDoorState.value.int_value = state;
-    homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
-  }
-  currentDoorState.value.int_value = state;
-  homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
-  if (state == DoorStateOpen || state == DoorStateClosed) {
-    radioPortal.emit(F("stop"));
+    if (notify) {
+      homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
+      radioPortal.emit(F("stop"));
+    }
   }
   console.log()
     .bracket("door")
@@ -113,8 +115,8 @@ void setup(void) {
   // setup door sensor
   const auto doorJson = doorStorage.load();
   doorSenser = new DoorSenser(doorJson);
-  doorSenser->onStateChange = setCurrentDoorState;
-  setCurrentDoorState(doorSenser->readState());
+  doorSenser->onStateChange = [](const DoorState state) { setCurrentDoorState(state, true); };
+  setCurrentDoorState(doorSenser->readState(), false);
 
   // setup homekit server
   hostName = victorWifi.getHostName();

@@ -26,9 +26,12 @@ homekit_service_t informationService = HOMEKIT_SERVICE_(
   },
 );
 
-homekit_characteristic_t targetDoorState = HOMEKIT_CHARACTERISTIC_(TARGET_DOOR_STATE, 0);
-homekit_characteristic_t currentDoorState = HOMEKIT_CHARACTERISTIC_(CURRENT_DOOR_STATE, 0);
-homekit_characteristic_t obstructionState = HOMEKIT_CHARACTERISTIC_(OBSTRUCTION_DETECTED, false);
+// format: uint8; HAP section 9.118; 0 = opened, 1 = closed
+homekit_characteristic_t targetDoorState = HOMEKIT_CHARACTERISTIC_(TARGET_DOOR_STATE, 1);
+// format: uint8; HAP section 9.30; 0 = opened, 1 = closed, 2 = opening, 3 = closing, 4 = stopped not open or closed
+homekit_characteristic_t currentDoorState = HOMEKIT_CHARACTERISTIC_(CURRENT_DOOR_STATE, 4);
+// format: bool; HAP section 9.65; 0 = no obstruction, 1 = obstruction detected
+homekit_characteristic_t obstructionState = HOMEKIT_CHARACTERISTIC_(OBSTRUCTION_DETECTED, 0);
 
 homekit_service_t stateService = HOMEKIT_SERVICE_(
   GARAGE_DOOR_OPENER,

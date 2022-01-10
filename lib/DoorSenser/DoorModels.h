@@ -10,8 +10,7 @@ namespace Victor {
     DoorStateClosed = 1,
     DoorStateOpening = 2,
     DoorStateClosing = 3,
-    DoorStateStopped = 4,
-    DoorStateUnknown = 255,
+    DoorStateStopped = 4, // stopped not open or closed
   };
 
   struct DoorSetting {
