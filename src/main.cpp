@@ -53,13 +53,11 @@ void targetDoorStateSetter(const homekit_value_t value) {
 
 void setCurrentDoorState(DoorState state, bool notify) {
   currentDoorState.value.int_value = state;
+  targetDoorState.value.int_value = (state == DoorStateOpen || state == DoorStateOpening) ? DoorStateOpen : DoorStateClosed;
   if (notify) {
+    homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
-  }
-  if (state == DoorStateOpen || state == DoorStateClosed) {
-    targetDoorState.value.int_value = state;
-    if (notify) {
-      homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
+    if (state == DoorStateOpen || state == DoorStateClosed) {
       radioPortal.emit(F("stop"));
     }
   }
