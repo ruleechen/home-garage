@@ -40,11 +40,15 @@ void targetDoorStateSetter(const homekit_value_t value) {
   targetDoorState.value.int_value = value.int_value;
   const auto state = DoorState(value.int_value);
   if (state == DoorStateOpen) {
-    radioPortal.emit(F("open"));
     builtinLed.turnOn();
-  } else {
-    radioPortal.emit(F("close"));
+    if (currentDoorState.value.int_value != DoorStateOpen) {
+      radioPortal.emit(F("open"));
+    }
+  } else if (state == DoorStateClosed) {
     builtinLed.turnOff();
+    if (currentDoorState.value.int_value != DoorStateClosed) {
+      radioPortal.emit(F("close"));
+    }
   }
   console.log()
     .bracket(F("door"))
