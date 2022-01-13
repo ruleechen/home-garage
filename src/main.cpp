@@ -106,10 +106,12 @@ void setup(void) {
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
   webPortal.onRadioEmit = [](const int index) { radioPortal.emit(index); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
-    items.push_back({ .key = F("Service"), .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    items.push_back({ .key = F("State"),   .value = parseStateName(currentDoorState.value.int_value) });
-    items.push_back({ .key = F("Paired"),  .value = parseYesNo(homekit_is_paired()) });
-    items.push_back({ .key = F("Clients"), .value = String(arduino_homekit_connected_clients_count()) });
+    items.push_back({ .key = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
+    items.push_back({ .key = F("Target"),      .value = parseStateName(targetDoorState.value.int_value) });
+    items.push_back({ .key = F("Current"),     .value = parseStateName(currentDoorState.value.int_value) });
+    items.push_back({ .key = F("Obstruction"), .value = parseYesNo(obstructionState.value.bool_value) });
+    items.push_back({ .key = F("Paired"),      .value = parseYesNo(homekit_is_paired()) });
+    items.push_back({ .key = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
   };
   webPortal.onServicePost = [](const String type) {
     if (type == F("reset")) {
