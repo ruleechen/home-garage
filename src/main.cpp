@@ -27,7 +27,7 @@ RCSwitch mySwitch = RCSwitch();
 DoorSenser* doorSenser;
 String hostName;
 
-String parseStateName(int state) {
+String parseStateName(uint8_t state) {
   return state == DoorStateOpen ? F("Open")
     : state == DoorStateClosed ?  F("Closed")
     : state == DoorStateOpening ? F("Opening")
@@ -41,16 +41,16 @@ String parseYesNo(bool state) {
 }
 
 void targetDoorStateSetter(const homekit_value_t value) {
-  targetDoorState.value.int_value = value.int_value;
-  const auto state = DoorState(value.int_value);
+  targetDoorState.value.uint8_value = value.uint8_value;
+  const auto state = DoorState(value.uint8_value);
   if (state == DoorStateOpen) {
     builtinLed.turnOn();
-    if (currentDoorState.value.int_value != DoorStateOpen) {
+    if (currentDoorState.value.uint8_value != DoorStateOpen) {
       radioPortal.emit(F("open"));
     }
   } else if (state == DoorStateClosed) {
     builtinLed.turnOff();
-    if (currentDoorState.value.int_value != DoorStateClosed) {
+    if (currentDoorState.value.uint8_value != DoorStateClosed) {
       radioPortal.emit(F("close"));
     }
   }
@@ -60,8 +60,8 @@ void targetDoorStateSetter(const homekit_value_t value) {
 }
 
 void setCurrentDoorState(DoorState state, bool notify) {
-  currentDoorState.value.int_value = state;
-  targetDoorState.value.int_value = (state == DoorStateOpen || state == DoorStateOpening) ? DoorStateOpen : DoorStateClosed;
+  currentDoorState.value.uint8_value = state;
+  targetDoorState.value.uint8_value = (state == DoorStateOpen || state == DoorStateOpening) ? DoorStateOpen : DoorStateClosed;
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
@@ -77,7 +77,9 @@ void setCurrentDoorState(DoorState state, bool notify) {
 void setup(void) {
   console.begin(115200);
   if (!LittleFS.begin()) {
-    console.error(F("fs mount failed"));
+    console.error()
+      .bracket(F("fs"))
+      .section(F("mount failed"));
   }
 
   builtinLed.setup();
@@ -104,11 +106,11 @@ void setup(void) {
   // setup web
   webPortal.onRequestStart = []() { builtinLed.toggle(); };
   webPortal.onRequestEnd = []() { builtinLed.toggle(); };
-  webPortal.onRadioEmit = [](const int index) { radioPortal.emit(index); };
+  webPortal.onRadioEmit = [](const uint8_t index) { radioPortal.emit(index); };
   webPortal.onServiceGet = [](std::vector<KeyValueModel>& items) {
     items.push_back({ .key = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
-    items.push_back({ .key = F("Target"),      .value = parseStateName(targetDoorState.value.int_value) });
-    items.push_back({ .key = F("Current"),     .value = parseStateName(currentDoorState.value.int_value) });
+    items.push_back({ .key = F("Target"),      .value = parseStateName(targetDoorState.value.uint8_value) });
+    items.push_back({ .key = F("Current"),     .value = parseStateName(currentDoorState.value.uint8_value) });
     items.push_back({ .key = F("Obstruction"), .value = parseYesNo(obstructionState.value.bool_value) });
     items.push_back({ .key = F("Paired"),      .value = parseYesNo(homekit_is_paired()) });
     items.push_back({ .key = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
@@ -137,7 +139,9 @@ void setup(void) {
   victorWifi.setup();
 
   // done
-  console.log(F("setup complete"));
+  console.log()
+    .bracket(F("setup"))
+    .section(F("complete"));
 }
 
 void loop(void) {
