@@ -28,12 +28,13 @@ DoorSensor* doorSensor;
 String hostName;
 
 String parseStateName(uint8_t state) {
-  return state == DoorStateOpen ? F("Open")
-    : state == DoorStateClosed ?  F("Closed")
-    : state == DoorStateOpening ? F("Opening")
-    : state == DoorStateClosing ? F("Closing")
-    : state == DoorStateStopped ? F("Stopped")
-    : F("Unknown");
+  return (
+    state == DoorStateOpen ?    F("Open") :
+    state == DoorStateClosed ?  F("Closed") :
+    state == DoorStateOpening ? F("Opening") :
+    state == DoorStateClosing ? F("Closing") :
+    state == DoorStateStopped ? F("Stopped") : F("Unknown")
+  );
 }
 
 String parseYesNo(bool state) {
