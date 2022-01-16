@@ -1,14 +1,14 @@
-#ifndef DoorSenser_h
-#define DoorSenser_h
+#ifndef DoorSensor_h
+#define DoorSensor_h
 
 #include <DigitalInput.h>
 #include "DoorModels.h"
 
 namespace Victor::Components {
-  class DoorSenser {
+  class DoorSensor {
    public:
-    DoorSenser(DoorSetting model);
-    ~DoorSenser();
+    DoorSensor(DoorSetting model);
+    ~DoorSensor();
     void loop();
     DoorState readState();
     // events
@@ -16,8 +16,8 @@ namespace Victor::Components {
     TStateHandler onStateChange = nullptr;
 
    private:
-    DigitalInput* _openSenser = nullptr;
-    DigitalInput* _closedSenser = nullptr;
+    DigitalInput* _openSensor = nullptr;
+    DigitalInput* _closedSensor = nullptr;
     DoorState _lastState = DoorStateStopped;
     unsigned long _lastLoop = 0;
     unsigned long _lastChange = 0;
@@ -25,4 +25,4 @@ namespace Victor::Components {
 
 } // namespace Victor::Components
 
-#endif // DoorSenser_h
+#endif // DoorSensor_h

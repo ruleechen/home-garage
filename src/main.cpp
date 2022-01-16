@@ -10,7 +10,7 @@
 #include <VictorWeb.h>
 
 #include "DoorStorage.h"
-#include "DoorSenser.h"
+#include "DoorSensor.h"
 
 using namespace Victor;
 using namespace Victor::Components;
@@ -24,7 +24,7 @@ extern "C" homekit_server_config_t serverConfig;
 VictorRadio radioPortal;
 VictorWeb webPortal(80);
 RCSwitch mySwitch = RCSwitch();
-DoorSenser* doorSenser;
+DoorSensor* doorSensor;
 String hostName;
 
 String parseStateName(uint8_t state) {
@@ -122,11 +122,11 @@ void setup(void) {
   };
   webPortal.setup();
 
-  // setup door sensor
+  // setup sensor
   const auto doorJson = doorStorage.load();
-  doorSenser = new DoorSenser(doorJson);
-  doorSenser->onStateChange = [](const DoorState state) { setCurrentDoorState(state, true); };
-  setCurrentDoorState(doorSenser->readState(), false);
+  doorSensor = new DoorSensor(doorJson);
+  doorSensor->onStateChange = [](const DoorState state) { setCurrentDoorState(state, true); };
+  setCurrentDoorState(doorSensor->readState(), false);
 
   // setup homekit server
   hostName = victorWifi.getHostName();
@@ -146,7 +146,7 @@ void setup(void) {
 
 void loop(void) {
   webPortal.loop();
-  doorSenser->loop();
+  doorSensor->loop();
   arduino_homekit_loop();
   // loop radio
   if (mySwitch.available()) {
