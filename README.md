@@ -1,5 +1,5 @@
 # Home Garage
-Apple HomeKit garage door opener firmware for  FutureCoast 51#
+Apple HomeKit garage door opener firmware for Lujingwan
 
 ### Development Tools
 - [Visual Studio Code](https://code.visualstudio.com/)
