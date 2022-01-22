@@ -3,7 +3,7 @@
 namespace Victor::Components {
 
   DoorStorage::DoorStorage() {
-    _filePath = F("/door.json");
+    _filePath = "/door.json";
     _maxSize = 512;
   }
 
