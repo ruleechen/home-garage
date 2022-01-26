@@ -43,6 +43,7 @@ String toDoorStateName(uint8_t state) {
 
 void targetDoorStateSetter(const homekit_value_t value) {
   targetDoorState.value.uint8_value = value.uint8_value;
+  homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
   const auto state = DoorState(value.uint8_value);
   if (state == DoorStateOpen) {
     builtinLed.turnOn();
