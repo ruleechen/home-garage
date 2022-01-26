@@ -42,6 +42,7 @@ String toDoorStateName(uint8_t state) {
 }
 
 void targetDoorStateSetter(const homekit_value_t value) {
+  ESP.wdtFeed();
   targetDoorState.value.uint8_value = value.uint8_value;
   homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
   const auto state = DoorState(value.uint8_value);
@@ -62,6 +63,7 @@ void targetDoorStateSetter(const homekit_value_t value) {
 }
 
 void setCurrentDoorState(DoorState state, bool notify) {
+  ESP.wdtFeed();
   currentDoorState.value.uint8_value = state;
   targetDoorState.value.uint8_value = (state == DoorStateOpen || state == DoorStateOpening) ? DoorStateOpen : DoorStateClosed;
   if (notify) {
@@ -147,9 +149,9 @@ void setup(void) {
 }
 
 void loop(void) {
+  arduino_homekit_loop();
   webPortal.loop();
   doorSensor->loop();
-  arduino_homekit_loop();
   // loop radio
   if (mySwitch.available()) {
     const auto value = String(mySwitch.getReceivedValue());
