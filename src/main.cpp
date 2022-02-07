@@ -99,6 +99,7 @@ void setup(void) {
   }
   radioPortal.onEmit = [](const RadioEmit& emit) {
     const auto value = emit.value.toInt();
+    mySwitch.setProtocol(emit.channel);
     mySwitch.send(value, 24);
     builtinLed.flash();
     console.log()
