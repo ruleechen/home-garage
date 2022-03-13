@@ -19,6 +19,7 @@ extern "C" homekit_characteristic_t targetDoorState;
 extern "C" homekit_characteristic_t currentDoorState;
 extern "C" homekit_characteristic_t obstructionState;
 extern "C" homekit_characteristic_t accessoryName;
+extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
 VictorRadio radioPortal;
@@ -26,6 +27,7 @@ VictorWeb webPortal(80);
 RCSwitch mySwitch = RCSwitch();
 DoorSensor* doorSensor;
 String hostName;
+String serialNumber;
 
 String toYesNoName(bool state) {
   return state == true ? F("Yes") : F("No");
@@ -135,7 +137,9 @@ void setup(void) {
 
   // setup homekit server
   hostName = victorWifi.getHostName();
+  serialNumber = String(VICTOR_ACCESSORY_INFORMATION_SERIAL_NUMBER) + "/" + victorWifi.getHostId();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
+  accessorySerialNumber.value.string_value =const_cast<char*>(serialNumber.c_str());
   targetDoorState.setter = targetDoorStateSetter;
   arduino_homekit_setup(&serverConfig);
 
