@@ -126,15 +126,15 @@ void setup(void) {
     states.push_back({ .text = F("Paired"),      .value = toYesNoName(homekit_is_paired()) });
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
-    const auto currentState = DoorState(currentDoorState.value.uint8_value);
-    if (currentState == DoorStateOpen) {
+    buttons.push_back({ .text = F("Unpair"), .value = F("Unpair") });
+    if (targetDoorState.value.uint8_value == DoorStateOpen) {
       buttons.push_back({ .text = F("Close"), .value = F("Close") });
     } else {
       buttons.push_back({ .text = F("Open"), .value = F("Open") });
     }
   };
   webPortal.onServicePost = [](const String& value) {
-    if (value == F("Reset")) {
+    if (value == F("Unpair")) {
       homekit_server_reset();
     } else if (value == F("Close")) {
       setTargetDoorState(DoorStateClosed);
