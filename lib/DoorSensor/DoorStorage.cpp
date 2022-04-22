@@ -2,28 +2,25 @@
 
 namespace Victor::Components {
 
-  DoorStorage::DoorStorage() {
-    _filePath = "/door.json";
+  DoorStorage::DoorStorage(const char* filePath) {
+    _filePath = filePath;
     _maxSize = 512;
   }
 
   void DoorStorage::_serializeTo(const DoorSetting& model, DynamicJsonDocument& doc) {
-    const JsonArray setting = doc.createNestedArray(F("s"));
-    setting[0] = model.openSensorPin;
-    setting[1] = model.closedSensorPin;
-    setting[2] = model.openTrueValue;
-    setting[3] = model.closedTrueValue;
+    const JsonArray pinArr = doc.createNestedArray(F("pin"));
+    pinArr[0] = model.openSensorPin;
+    pinArr[1] = model.closedSensorPin;
+    pinArr[2] = model.openTrueValue;
+    pinArr[3] = model.closedTrueValue;
   }
 
   void DoorStorage::_deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) {
-    const auto setting = doc[F("s")];
-    model.openSensorPin = setting[0];
-    model.closedSensorPin = setting[1];
-    model.openTrueValue = setting[2];
-    model.closedTrueValue = setting[3];
+    const auto pinArr = doc[F("pin")];
+    model.openSensorPin = pinArr[0];
+    model.closedSensorPin = pinArr[1];
+    model.openTrueValue = pinArr[2];
+    model.closedTrueValue = pinArr[3];
   }
-
-  // global
-  DoorStorage doorStorage;
 
 } // namespace Victor::Components

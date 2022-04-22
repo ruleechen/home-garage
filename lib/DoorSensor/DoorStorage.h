@@ -7,15 +7,12 @@
 namespace Victor::Components {
   class DoorStorage : public FileStorage<DoorSetting> {
    public:
-    DoorStorage();
+    DoorStorage(const char* filePath);
 
    protected:
     void _serializeTo(const DoorSetting& model, DynamicJsonDocument& doc) override;
     void _deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) override;
   };
-
-  // global
-  extern DoorStorage doorStorage;
 
 } // namespace Victor::Components
 

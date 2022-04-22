@@ -2,6 +2,7 @@
 #include <RCSwitch.h>
 #include <arduino_homekit_server.h>
 
+#include <GlobalHelpers.h>
 #include <Console.h>
 #include <BuiltinLed.h>
 #include <VictorOTA.h>
@@ -28,10 +29,6 @@ RCSwitch mySwitch = RCSwitch();
 DoorSensor* doorSensor;
 String hostName;
 String serialNumber;
-
-String toYesNoName(bool state) {
-  return state == true ? F("Yes") : F("No");
-}
 
 String toDoorStateName(uint8_t state) {
   return (
@@ -122,8 +119,8 @@ void setup(void) {
     states.push_back({ .text = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
     states.push_back({ .text = F("Target"),      .value = toDoorStateName(targetDoorState.value.uint8_value) });
     states.push_back({ .text = F("Current"),     .value = toDoorStateName(currentDoorState.value.uint8_value) });
-    states.push_back({ .text = F("Obstruction"), .value = toYesNoName(obstructionState.value.bool_value) });
-    states.push_back({ .text = F("Paired"),      .value = toYesNoName(homekit_is_paired()) });
+    states.push_back({ .text = F("Obstruction"), .value = GlobalHelpers::toYesNoName(obstructionState.value.bool_value) });
+    states.push_back({ .text = F("Paired"),      .value = GlobalHelpers::toYesNoName(homekit_is_paired()) });
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
     buttons.push_back({ .text = F("Unpair"), .value = F("Unpair") });
@@ -145,8 +142,8 @@ void setup(void) {
   webPortal.setup();
 
   // setup sensor
-  const auto doorJson = doorStorage.load();
-  doorSensor = new DoorSensor(doorJson);
+  const auto storage = new DoorStorage("/door.json");
+  doorSensor = new DoorSensor(storage->load());
   doorSensor->onStateChange = [](const DoorState state) { setCurrentDoorState(state, true); };
   setCurrentDoorState(doorSensor->readState(), false);
 
