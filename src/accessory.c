@@ -34,7 +34,7 @@ homekit_characteristic_t currentDoorState = HOMEKIT_CHARACTERISTIC_(CURRENT_DOOR
 // format: bool; HAP section 9.65; 0 = no obstruction, 1 = obstruction detected
 homekit_characteristic_t obstructionState = HOMEKIT_CHARACTERISTIC_(OBSTRUCTION_DETECTED, 0);
 // format: string; HAP section 9.62; maximum length 64
-homekit_characteristic_t garageNameState = HOMEKIT_CHARACTERISTIC_(NAME, "Garage-Door-Opener");
+homekit_characteristic_t nameState = HOMEKIT_CHARACTERISTIC_(NAME, "Garage Door Opener");
 
 homekit_service_t stateService = HOMEKIT_SERVICE_(
   GARAGE_DOOR_OPENER,
@@ -43,7 +43,7 @@ homekit_service_t stateService = HOMEKIT_SERVICE_(
     &targetDoorState,
     &currentDoorState,
     &obstructionState,
-    &garageNameState,
+    &nameState,
     NULL,
   },
 );
