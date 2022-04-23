@@ -8,19 +8,25 @@ namespace Victor::Components {
   }
 
   void DoorStorage::_serializeTo(const DoorSetting& model, DynamicJsonDocument& doc) {
-    const JsonArray pinArr = doc.createNestedArray(F("pin"));
-    pinArr[0] = model.openSensorPin;
-    pinArr[1] = model.closedSensorPin;
-    pinArr[2] = model.openTrueValue;
-    pinArr[3] = model.closedTrueValue;
+    // open
+    const JsonArray openArr = doc.createNestedArray(F("open"));
+    openArr[0] = model.openSensorPin;
+    openArr[1] = model.openTrueValue;
+    // closed
+    const JsonArray closedArr = doc.createNestedArray(F("closed"));
+    closedArr[0] = model.closedSensorPin;
+    closedArr[1] = model.closedTrueValue;
   }
 
   void DoorStorage::_deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) {
-    const auto pinArr = doc[F("pin")];
-    model.openSensorPin = pinArr[0];
-    model.closedSensorPin = pinArr[1];
-    model.openTrueValue = pinArr[2];
-    model.closedTrueValue = pinArr[3];
+    // open
+    const auto openArr = doc[F("open")];
+    model.openSensorPin = openArr[0];
+    model.openTrueValue = openArr[1];
+    // closed
+    const auto closedArr = doc[F("closed")];
+    model.closedSensorPin = closedArr[0];
+    model.closedTrueValue = closedArr[1];
   }
 
 } // namespace Victor::Components
