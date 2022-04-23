@@ -18,9 +18,9 @@ namespace Victor::Components {
 
   DoorSensor::~DoorSensor() {
     delete _openSensor;
-    _openSensor = NULL;
+    _openSensor = nullptr;
     delete _closedSensor;
-    _closedSensor = NULL;
+    _closedSensor = nullptr;
   }
 
   void DoorSensor::loop() {
@@ -34,7 +34,7 @@ namespace Victor::Components {
       if (state != _lastState) {
         _lastState = state;
         _lastChange = now;
-        if (onStateChange) {
+        if (onStateChange != nullptr) {
           onStateChange(state);
         }
       }
