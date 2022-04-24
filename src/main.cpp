@@ -25,7 +25,7 @@ extern "C" homekit_server_config_t serverConfig;
 
 VictorRadio radioPortal;
 VictorWeb webPortal(80);
-RCSwitch mySwitch = RCSwitch();
+RCSwitch rf = RCSwitch();
 DoorSensor* doorSensor;
 String hostName;
 String serialNumber;
@@ -94,15 +94,15 @@ void setup(void) {
   // setup radio
   const auto radioJson = radioStorage.load();
   if (radioJson.inputPin > 0) {
-    mySwitch.enableReceive(radioJson.inputPin);
+    rf.enableReceive(radioJson.inputPin);
   }
   if (radioJson.outputPin > 0) {
-    mySwitch.enableTransmit(radioJson.outputPin);
+    rf.enableTransmit(radioJson.outputPin);
   }
   radioPortal.onEmit = [](const RadioEmit& emit) {
     const auto value = emit.value.toInt();
-    mySwitch.setProtocol(emit.channel);
-    mySwitch.send(value, 24);
+    rf.setProtocol(emit.channel);
+    rf.send(value, 24);
     builtinLed.flash();
     console.log()
       .bracket(F("radio"))
@@ -125,9 +125,9 @@ void setup(void) {
     // buttons
     buttons.push_back({ .text = F("Unpair"), .value = F("Unpair") });
     if (targetDoorState.value.uint8_value == DoorStateOpen) {
-      buttons.push_back({ .text = F("Close"), .value = F("Close") });
+      buttons.push_back({ .text = F("Close Door"), .value = F("Close") });
     } else {
-      buttons.push_back({ .text = F("Open"), .value = F("Open") });
+      buttons.push_back({ .text = F("Open Door"), .value = F("Open") });
     }
   };
   webPortal.onServicePost = [](const String& value) {
@@ -151,7 +151,7 @@ void setup(void) {
   hostName = victorWifi.getHostName();
   serialNumber = String(VICTOR_ACCESSORY_INFORMATION_SERIAL_NUMBER) + "/" + victorWifi.getHostId();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
-  accessorySerialNumber.value.string_value =const_cast<char*>(serialNumber.c_str());
+  accessorySerialNumber.value.string_value = const_cast<char*>(serialNumber.c_str());
   targetDoorState.setter = targetDoorStateSetter;
   arduino_homekit_setup(&serverConfig);
 
@@ -170,15 +170,15 @@ void loop(void) {
   webPortal.loop();
   doorSensor->loop();
   // loop radio
-  if (mySwitch.available()) {
-    const auto value = String(mySwitch.getReceivedValue());
-    const auto channel = mySwitch.getReceivedProtocol();
+  if (rf.available()) {
+    const auto value = String(rf.getReceivedValue());
+    const auto channel = rf.getReceivedProtocol();
     radioPortal.receive(value, channel);
     builtinLed.flash();
     console.log()
       .bracket(F("radio"))
       .section(F("received"), value)
       .section(F("from channel"), String(channel));
-    mySwitch.resetAvailable();
+    rf.resetAvailable();
   }
 }
