@@ -133,6 +133,7 @@ void setup(void) {
   webPortal.onServicePost = [](const String& value) {
     if (value == F("Unpair")) {
       homekit_server_reset();
+      ESP.restart();
     } else if (value == F("Close")) {
       setTargetDoorState(DoorStateClosed);
     } else if (value == F("Open")) {
