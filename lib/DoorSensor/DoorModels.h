@@ -14,12 +14,12 @@ namespace Victor {
   };
 
   struct DoorSetting {
-    // open
-    int8_t openSensorPin = -1;
-    uint8_t openTrueValue = 0;  // LOW
-    // closed
-    int8_t closedSensorPin = -1;
-    uint8_t closedTrueValue = 0; // LOW
+    // door open
+    int8_t doorOpenPin = -1;
+    uint8_t doorOpenTrueValue = 0;  // LOW
+    // door closed
+    int8_t doorClosedPin = -1;
+    uint8_t doorClosedTrueValue = 0; // LOW
   };
 
 } // namespace Victor

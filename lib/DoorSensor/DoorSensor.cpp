@@ -1,18 +1,10 @@
 #include "DoorSensor.h"
 
-#ifndef DOORSENSOR_INTERVAL
-#define DOORSENSOR_INTERVAL 250
-#endif
-
-#ifndef DOORSENSOR_DEBOUNCE
-#define DOORSENSOR_DEBOUNCE 3000
-#endif
-
 namespace Victor::Components {
 
   DoorSensor::DoorSensor(DoorSetting model) {
-    _openSensor = new DigitalInput(model.openSensorPin, model.openTrueValue);
-    _closedSensor = new DigitalInput(model.closedSensorPin, model.closedTrueValue);
+    _openSensor = new DigitalInput(model.doorOpenPin, model.doorOpenTrueValue);
+    _closedSensor = new DigitalInput(model.doorClosedPin, model.doorClosedTrueValue);
     _lastState = readState();
   }
 

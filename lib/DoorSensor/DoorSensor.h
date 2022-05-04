@@ -4,6 +4,14 @@
 #include <DigitalInput.h>
 #include "DoorModels.h"
 
+#ifndef DOORSENSOR_INTERVAL
+#define DOORSENSOR_INTERVAL 250
+#endif
+
+#ifndef DOORSENSOR_DEBOUNCE
+#define DOORSENSOR_DEBOUNCE 3000
+#endif
+
 namespace Victor::Components {
   class DoorSensor {
    public:
