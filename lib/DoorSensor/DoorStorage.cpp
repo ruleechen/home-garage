@@ -2,9 +2,8 @@
 
 namespace Victor::Components {
 
-  DoorStorage::DoorStorage(const char* filePath) {
-    _filePath = filePath;
-    _maxSize = 512;
+  DoorStorage::DoorStorage(const char* filePath) : FileStorage(filePath) {
+    _maxSize = 256;
   }
 
   void DoorStorage::_serializeTo(const DoorSetting& model, DynamicJsonDocument& doc) {

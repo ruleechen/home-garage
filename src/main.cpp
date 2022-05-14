@@ -90,6 +90,8 @@ void setup(void) {
 
   builtinLed.setup();
   builtinLed.turnOn();
+  victorOTA.setup();
+  victorWifi.setup();
 
   // setup radio
   const auto radioJson = radioStorage.load();
@@ -155,10 +157,6 @@ void setup(void) {
   accessorySerialNumber.value.string_value = const_cast<char*>(serialNumber.c_str());
   targetDoorState.setter = targetDoorStateSetter;
   arduino_homekit_setup(&serverConfig);
-
-  // setup wifi
-  victorOTA.setup();
-  victorWifi.setup();
 
   // done
   console.log()
