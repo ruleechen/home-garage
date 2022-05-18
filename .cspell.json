@@ -17,6 +17,7 @@
     "rssi",
     "mDNS",
     "mithril",
-    "oninit"
+    "oninit",
+    "homekit"
   ]
 }
