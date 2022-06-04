@@ -2,13 +2,7 @@
 #include <RCSwitch.h>
 #include <arduino_homekit_server.h>
 
-#include <GlobalHelpers.h>
-#include <Console.h>
-#include <BuiltinLed.h>
-#include <VictorOTA.h>
-#include <VictorWifi.h>
-#include <VictorRadio.h>
-#include <VictorWeb.h>
+#include <AppMain/AppMain.h>
 
 #include "DoorStorage.h"
 #include "DoorSensor.h"
@@ -23,8 +17,8 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
-VictorRadio radioPortal;
-VictorWeb webPortal(80);
+AppMain* appMain;
+
 RCSwitch rf = RCSwitch();
 DoorSensor* doorSensor;
 String hostName;
@@ -47,12 +41,12 @@ void setTargetDoorState(DoorState state) {
   if (state == DoorStateOpen) {
     builtinLed.turnOn();
     if (currentDoorState.value.uint8_value != DoorStateOpen) {
-      radioPortal.emit(F("open"));
+      appMain->radioPortal->emit(F("open"));
     }
   } else if (state == DoorStateClosed) {
     builtinLed.turnOff();
     if (currentDoorState.value.uint8_value != DoorStateClosed) {
-      radioPortal.emit(F("close"));
+      appMain->radioPortal->emit(F("close"));
     }
   }
   console.log()
@@ -72,7 +66,7 @@ void setCurrentDoorState(DoorState state, bool notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
     if (state == DoorStateOpen || state == DoorStateClosed) {
-      radioPortal.emit(F("stop"));
+      appMain->radioPortal->emit(F("stop"));
     }
   }
   console.log()
@@ -81,17 +75,11 @@ void setCurrentDoorState(DoorState state, bool notify) {
 }
 
 void setup(void) {
-  console.begin(115200);
-  if (!LittleFS.begin()) {
-    console.error()
-      .bracket(F("fs"))
-      .section(F("mount failed"));
-  }
-
-  builtinLed.setup();
-  builtinLed.turnOn();
-  victorOTA.setup();
-  victorWifi.setup();
+  appMain = new AppMain();
+  appMain->setup({
+    .web = true,
+    .radio = true,
+  });
 
   // setup radio
   const auto radioJson = radioStorage.load();
@@ -101,7 +89,7 @@ void setup(void) {
   if (radioJson.outputPin > 0) {
     rf.enableTransmit(radioJson.outputPin);
   }
-  radioPortal.onEmit = [](const RadioEmit& emit) {
+  appMain->radioPortal->onEmit = [](const RadioEmit& emit) {
     const auto value = emit.value.toInt();
     rf.setProtocol(emit.channel);
     rf.send(value, 24);
@@ -113,10 +101,7 @@ void setup(void) {
   };
 
   // setup web
-  webPortal.onRequestStart = []() { builtinLed.toggle(); };
-  webPortal.onRequestEnd = []() { builtinLed.toggle(); };
-  webPortal.onRadioEmit = [](uint8_t index) { radioPortal.emit(index); };
-  webPortal.onServiceGet = [](std::vector<TextValueModel>& states, std::vector<TextValueModel>& buttons) {
+  appMain->webPortal->onServiceGet = [](std::vector<TextValueModel>& states, std::vector<TextValueModel>& buttons) {
     // states
     states.push_back({ .text = F("Service"),     .value = VICTOR_ACCESSORY_SERVICE_NAME });
     states.push_back({ .text = F("Target"),      .value = toDoorStateName(targetDoorState.value.uint8_value) });
@@ -129,7 +114,7 @@ void setup(void) {
     buttons.push_back({ .text = F("Door-Close"), .value = F("Close") });
     buttons.push_back({ .text = F("Door-Open"),  .value = F("Open") });
   };
-  webPortal.onServicePost = [](const String& value) {
+  appMain->webPortal->onServicePost = [](const String& value) {
     if (value == F("UnPair")) {
       homekit_server_reset();
       ESP.restart();
@@ -139,7 +124,6 @@ void setup(void) {
       setTargetDoorState(DoorStateOpen);
     }
   };
-  webPortal.setup();
 
   // setup sensor
   const auto storage = new DoorStorage("/door.json");
@@ -162,14 +146,14 @@ void setup(void) {
 }
 
 void loop(void) {
-  arduino_homekit_loop();
-  webPortal.loop();
+  appMain->loop();
   doorSensor->loop();
+  arduino_homekit_loop();
   // loop radio
   if (rf.available()) {
     const auto value = String(rf.getReceivedValue());
     const auto channel = rf.getReceivedProtocol();
-    radioPortal.receive(value, channel);
+    appMain->radioPortal->receive(value, channel);
     builtinLed.flash();
     console.log()
       .bracket(F("radio"))
