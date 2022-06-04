@@ -76,10 +76,7 @@ void setCurrentDoorState(DoorState state, bool notify) {
 
 void setup(void) {
   appMain = new AppMain();
-  appMain->setup({
-    .web = true,
-    .radio = true,
-  });
+  appMain->setup();
 
   // setup radio
   const auto radioJson = radioStorage.load();
