@@ -18,8 +18,8 @@ namespace Victor::Components {
   void DoorSensor::loop() {
     const auto now = millis();
     if (
-      now - _lastLoop > DOORSENSOR_INTERVAL &&
-      now - _lastChange > DOORSENSOR_DEBOUNCE
+      now - _lastLoop > VICTOR_DOOR_SENSOR_INTERVAL &&
+      now - _lastChange > VICTOR_DOOR_SENSOR_DEBOUNCE
     ) {
       _lastLoop = now;
       const auto state = readState();

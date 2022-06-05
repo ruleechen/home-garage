@@ -13,8 +13,7 @@ homekit_characteristic_t accessoryVersion      = HOMEKIT_CHARACTERISTIC_(FIRMWAR
 homekit_characteristic_t accessoryIdentify     = HOMEKIT_CHARACTERISTIC_(IDENTIFY, onAccessoryIdentify);
 homekit_characteristic_t accessoryName         = HOMEKIT_CHARACTERISTIC_(NAME, VICTOR_ACCESSORY_SERVICE_NAME); // change on setup
 
-homekit_service_t informationService = HOMEKIT_SERVICE_(
-  ACCESSORY_INFORMATION,
+homekit_service_t informationService = HOMEKIT_SERVICE_(ACCESSORY_INFORMATION,
   .primary = false,
   .characteristics = (homekit_characteristic_t*[]) {
     &accessoryManufacturer,
@@ -36,8 +35,7 @@ homekit_characteristic_t obstructionState = HOMEKIT_CHARACTERISTIC_(OBSTRUCTION_
 // format: string; HAP section 9.62; maximum length 64
 homekit_characteristic_t nameState = HOMEKIT_CHARACTERISTIC_(NAME, "Garage Door Opener");
 
-homekit_service_t stateService = HOMEKIT_SERVICE_(
-  GARAGE_DOOR_OPENER,
+homekit_service_t stateService = HOMEKIT_SERVICE_(GARAGE_DOOR_OPENER,
   .primary = true,
   .characteristics = (homekit_characteristic_t*[]) {
     &targetDoorState,
