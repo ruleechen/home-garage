@@ -6,11 +6,11 @@
 namespace Victor {
 
   enum DoorState {
-    DoorStateOpen = 0,
-    DoorStateClosed = 1,
-    DoorStateOpening = 2,
-    DoorStateClosing = 3,
-    DoorStateStopped = 4, // stopped not open or closed
+    DOOR_STATE_OPEN = 0,
+    DOOR_STATE_CLOSED = 1,
+    DOOR_STATE_OPENING = 2,
+    DOOR_STATE_CLOSING = 3,
+    DOOR_STATE_STOPPED = 4, // stopped not open or closed
   };
 
   struct DoorSetting {

@@ -26,11 +26,11 @@ String serialNumber;
 
 String toDoorStateName(uint8_t state) {
   return (
-    state == DoorStateOpen ?    F("Open") :
-    state == DoorStateClosed ?  F("Closed") :
-    state == DoorStateOpening ? F("Opening") :
-    state == DoorStateClosing ? F("Closing") :
-    state == DoorStateStopped ? F("Stopped") : F("Unknown")
+    state == DOOR_STATE_OPEN ?    F("Open") :
+    state == DOOR_STATE_CLOSED ?  F("Closed") :
+    state == DOOR_STATE_OPENING ? F("Opening") :
+    state == DOOR_STATE_CLOSING ? F("Closing") :
+    state == DOOR_STATE_STOPPED ? F("Stopped") : F("Unknown")
   );
 }
 
@@ -38,14 +38,14 @@ void setTargetDoorState(DoorState state) {
   ESP.wdtFeed();
   targetDoorState.value.uint8_value = state;
   homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
-  if (state == DoorStateOpen) {
+  if (state == DOOR_STATE_OPEN) {
     builtinLed.turnOn();
-    if (currentDoorState.value.uint8_value != DoorStateOpen) {
+    if (currentDoorState.value.uint8_value != DOOR_STATE_OPEN) {
       appMain->radioPortal->emit(F("open"));
     }
-  } else if (state == DoorStateClosed) {
+  } else if (state == DOOR_STATE_CLOSED) {
     builtinLed.turnOff();
-    if (currentDoorState.value.uint8_value != DoorStateClosed) {
+    if (currentDoorState.value.uint8_value != DOOR_STATE_CLOSED) {
       appMain->radioPortal->emit(F("close"));
     }
   }
@@ -61,11 +61,11 @@ void targetDoorStateSetter(const homekit_value_t value) {
 void setCurrentDoorState(DoorState state, bool notify) {
   ESP.wdtFeed();
   currentDoorState.value.uint8_value = state;
-  targetDoorState.value.uint8_value = (state == DoorStateOpen || state == DoorStateOpening) ? DoorStateOpen : DoorStateClosed;
+  targetDoorState.value.uint8_value = (state == DOOR_STATE_OPEN || state == DOOR_STATE_OPENING) ? DOOR_STATE_OPEN : DOOR_STATE_CLOSED;
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
-    if (state == DoorStateOpen || state == DoorStateClosed) {
+    if (state == DOOR_STATE_OPEN || state == DOOR_STATE_CLOSED) {
       appMain->radioPortal->emit(F("stop"));
     }
   }
@@ -116,9 +116,9 @@ void setup(void) {
       homekit_server_reset();
       ESP.restart();
     } else if (value == F("Close")) {
-      setTargetDoorState(DoorStateClosed);
+      setTargetDoorState(DOOR_STATE_CLOSED);
     } else if (value == F("Open")) {
-      setTargetDoorState(DoorStateOpen);
+      setTargetDoorState(DOOR_STATE_OPEN);
     }
   };
 

@@ -36,14 +36,14 @@ namespace Victor::Components {
   DoorState DoorSensor::readState() {
     auto state = _lastState;
     if (_openSensor->getValue()) {
-      state = DoorStateOpen;
+      state = DOOR_STATE_OPEN;
     } else if (_closedSensor->getValue()) {
-      state = DoorStateClosed;
+      state = DOOR_STATE_CLOSED;
     } else {
-      if (_lastState == DoorStateOpen) {
-        state = DoorStateClosing;
-      } else if (_lastState == DoorStateClosed) {
-        state = DoorStateOpening;
+      if (_lastState == DOOR_STATE_OPEN) {
+        state = DOOR_STATE_CLOSING;
+      } else if (_lastState == DOOR_STATE_CLOSED) {
+        state = DOOR_STATE_OPENING;
       }
     }
     return state;
