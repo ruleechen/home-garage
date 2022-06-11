@@ -15,6 +15,8 @@ namespace Victor::Components {
     const JsonArray closedArr = doc.createNestedArray(F("closed"));
     closedArr[0] = model.doorClosedPin;
     closedArr[1] = model.doorClosedTrueValue;
+    // others
+    doc[F("debounce")] = model.debounce;
   }
 
   void DoorStorage::_deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) {
@@ -26,6 +28,8 @@ namespace Victor::Components {
     const auto closedArr = doc[F("closed")];
     model.doorClosedPin = closedArr[0];
     model.doorClosedTrueValue = closedArr[1];
+    // others
+    model.debounce = doc[F("debounce")];
   }
 
 } // namespace Victor::Components

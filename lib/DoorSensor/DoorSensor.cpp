@@ -6,7 +6,7 @@ namespace Victor::Components {
     _openSensor = new DigitalInput(model.doorOpenPin, model.doorOpenTrueValue);
     _closedSensor = new DigitalInput(model.doorClosedPin, model.doorClosedTrueValue);
     _interval = new IntervalOver(VICTOR_DOOR_SENSOR_INTERVAL);
-    _debounce = new IntervalOver(VICTOR_DOOR_SENSOR_DEBOUNCE);
+    _debounce = new IntervalOver(model.debounce);
     _lastState = readState();
   }
 

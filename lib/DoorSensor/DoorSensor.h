@@ -9,10 +9,6 @@
 #define VICTOR_DOOR_SENSOR_INTERVAL 250
 #endif
 
-#ifndef VICTOR_DOOR_SENSOR_DEBOUNCE
-#define VICTOR_DOOR_SENSOR_DEBOUNCE 3000
-#endif
-
 namespace Victor::Components {
   class DoorSensor {
    public:

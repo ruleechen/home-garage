@@ -20,6 +20,8 @@ namespace Victor {
     // door closed
     int8_t doorClosedPin = -1; // (-127 ~ 128)
     uint8_t doorClosedTrueValue = 0; // (0 ~ 256) LOW
+    // others
+    uint16_t debounce = 0; // (0 ~ 65535)
   };
 
 } // namespace Victor
