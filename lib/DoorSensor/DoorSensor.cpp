@@ -5,27 +5,22 @@ namespace Victor::Components {
   DoorSensor::DoorSensor(DoorSetting model) {
     _openSensor = new DigitalInput(model.doorOpenPin, model.doorOpenTrueValue);
     _closedSensor = new DigitalInput(model.doorClosedPin, model.doorClosedTrueValue);
+    _interval = new IntervalOver(VICTOR_DOOR_SENSOR_INTERVAL);
+    _debounce = new IntervalOver(VICTOR_DOOR_SENSOR_DEBOUNCE);
     _lastState = readState();
-  }
-
-  DoorSensor::~DoorSensor() {
-    delete _openSensor;
-    _openSensor = nullptr;
-    delete _closedSensor;
-    _closedSensor = nullptr;
   }
 
   void DoorSensor::loop() {
     const auto now = millis();
     if (
-      now - _lastLoop > VICTOR_DOOR_SENSOR_INTERVAL &&
-      now - _lastChange > VICTOR_DOOR_SENSOR_DEBOUNCE
+      _interval->isOver(now) &&
+      _debounce->isOver(now)
     ) {
-      _lastLoop = now;
+      _interval->start(now);
       const auto state = readState();
       if (state != _lastState) {
         _lastState = state;
-        _lastChange = now;
+        _debounce->start(now);
         if (onStateChange != nullptr) {
           onStateChange(state);
         }
