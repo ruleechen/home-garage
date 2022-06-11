@@ -5,24 +5,25 @@ namespace Victor::Components {
   DoorSensor::DoorSensor(DoorSetting model) {
     _openSensor = new DigitalInput(model.doorOpenPin, model.doorOpenTrueValue);
     _closedSensor = new DigitalInput(model.doorClosedPin, model.doorClosedTrueValue);
-    _interval = new IntervalOver(VICTOR_DOOR_SENSOR_INTERVAL);
     _debounce = new IntervalOver(model.debounce);
     _lastState = readState();
+    // register interrupt
+    attachInterrupt(digitalPinToInterrupt(model.doorOpenPin), _interruptHandler, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(model.doorClosedPin), _interruptHandler, CHANGE);
   }
 
   void DoorSensor::loop() {
-    const auto now = millis();
-    if (
-      _interval->isOver(now) &&
-      _debounce->isOver(now)
-    ) {
-      _interval->start(now);
-      const auto state = readState();
-      if (state != _lastState) {
-        _lastState = state;
-        _debounce->start(now);
-        if (onStateChange != nullptr) {
-          onStateChange(state);
+    if (_hasChanges) {
+      _hasChanges = false;
+      const auto now = millis();
+      if (_debounce->isOver(now)) {
+        const auto state = readState();
+        if (state != _lastState) {
+          _lastState = state;
+          _debounce->start(now);
+          if (onStateChange != nullptr) {
+            onStateChange(state);
+          }
         }
       }
     }
@@ -42,6 +43,11 @@ namespace Victor::Components {
       }
     }
     return state;
+  }
+
+  volatile bool DoorSensor::_hasChanges = false;
+  void IRAM_ATTR DoorSensor::_interruptHandler() {
+    _hasChanges = true;
   }
 
 } // namespace Victor::Components

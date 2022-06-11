@@ -1,13 +1,10 @@
 #ifndef DoorSensor_h
 #define DoorSensor_h
 
+#include <Arduino.h>
 #include <DigitalInput.h>
 #include <Timer/IntervalOver.h>
 #include "DoorModels.h"
-
-#ifndef VICTOR_DOOR_SENSOR_INTERVAL
-#define VICTOR_DOOR_SENSOR_INTERVAL 250
-#endif
 
 namespace Victor::Components {
   class DoorSensor {
@@ -22,9 +19,11 @@ namespace Victor::Components {
    private:
     DigitalInput* _openSensor = nullptr;
     DigitalInput* _closedSensor = nullptr;
-    IntervalOver* _interval = nullptr;
     IntervalOver* _debounce = nullptr;
     DoorState _lastState = DOOR_STATE_STOPPED;
+    // interrupt
+    volatile static bool _hasChanges;
+    static void IRAM_ATTR _interruptHandler();
   };
 
 } // namespace Victor::Components
