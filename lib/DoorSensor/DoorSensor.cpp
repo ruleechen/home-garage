@@ -2,14 +2,14 @@
 
 namespace Victor::Components {
 
-  DoorSensor::DoorSensor(DoorSetting model) {
-    _openSensor = new DigitalInput(model.doorOpenPin, model.doorOpenTrueValue);
-    _closedSensor = new DigitalInput(model.doorClosedPin, model.doorClosedTrueValue);
-    _debounce = new IntervalOver(model.debounce);
+  DoorSensor::DoorSensor(DoorSetting setting) {
+    _openSensor = new DigitalInput(setting.doorOpenPin, setting.doorOpenTrueValue);
+    _closedSensor = new DigitalInput(setting.doorClosedPin, setting.doorClosedTrueValue);
+    _debounce = new IntervalOver(setting.debounce);
     _lastState = readState();
     // register interrupt
-    attachInterrupt(digitalPinToInterrupt(model.doorOpenPin), _interruptHandler, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(model.doorClosedPin), _interruptHandler, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(setting.doorOpenPin), _interruptHandler, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(setting.doorClosedPin), _interruptHandler, CHANGE);
   }
 
   void DoorSensor::loop() {

@@ -21,6 +21,7 @@ AppMain* appMain;
 
 RCSwitch rf = RCSwitch();
 DoorSensor* doorSensor;
+uint16_t doorDebounce;
 String hostName;
 String serialNumber;
 
@@ -66,6 +67,7 @@ void setCurrentDoorState(DoorState state, bool notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
     if (state == DOOR_STATE_OPEN || state == DOOR_STATE_CLOSED) {
+      delay(doorDebounce); // pause some time before emit stop command to wait for door really stopped
       appMain->radioPortal->emit(F("stop"));
     }
   }
@@ -124,7 +126,9 @@ void setup(void) {
 
   // setup sensor
   const auto storage = new DoorStorage("/door.json");
-  doorSensor = new DoorSensor(storage->load());
+  const auto setting = storage->load();
+  doorDebounce = setting.debounce;
+  doorSensor = new DoorSensor(setting);
   doorSensor->onStateChange = [](const DoorState state) { setCurrentDoorState(state, true); };
   setCurrentDoorState(doorSensor->readState(), false);
 
