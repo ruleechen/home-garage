@@ -35,6 +35,22 @@ String toDoorStateName(uint8_t state) {
   );
 }
 
+void emitDoorCommand(DoorCommand command) {
+  switch (command) {
+    case DOOR_COMMAND_OPEN:
+      appMain->radioPortal->emit(F("open"));
+      break;
+    case DOOR_COMMAND_CLOSE:
+      appMain->radioPortal->emit(F("close"));
+      break;
+    case DOOR_COMMAND_STOP:
+      appMain->radioPortal->emit(F("stop"));
+      break;
+    default:
+      break;
+  }
+}
+
 void setTargetDoorState(DoorState state) {
   ESP.wdtFeed();
   targetDoorState.value.uint8_value = state;
@@ -42,12 +58,12 @@ void setTargetDoorState(DoorState state) {
   if (state == DOOR_STATE_OPEN) {
     builtinLed.turnOn();
     if (currentDoorState.value.uint8_value != DOOR_STATE_OPEN) {
-      appMain->radioPortal->emit(F("open"));
+      emitDoorCommand(DOOR_COMMAND_OPEN);
     }
   } else if (state == DOOR_STATE_CLOSED) {
     builtinLed.turnOff();
     if (currentDoorState.value.uint8_value != DOOR_STATE_CLOSED) {
-      appMain->radioPortal->emit(F("close"));
+      emitDoorCommand(DOOR_COMMAND_CLOSE);
     }
   }
   console.log()
@@ -68,7 +84,7 @@ void setCurrentDoorState(DoorState state, bool notify) {
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
     if (state == DOOR_STATE_OPEN || state == DOOR_STATE_CLOSED) {
       delay(doorDebounce); // pause some time before emit stop command to wait for door really stopped
-      appMain->radioPortal->emit(F("stop"));
+      emitDoorCommand(DOOR_COMMAND_STOP);
     }
   }
   console.log()

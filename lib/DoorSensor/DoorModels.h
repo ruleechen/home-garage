@@ -13,6 +13,12 @@ namespace Victor {
     DOOR_STATE_STOPPED = 4, // stopped not open or closed
   };
 
+  enum DoorCommand {
+    DOOR_COMMAND_OPEN = 0,
+    DOOR_COMMAND_CLOSE = 1,
+    DOOR_COMMAND_STOP = 2,
+  };
+
   struct DoorSetting {
     // door open
     int8_t doorOpenPin = -1; // (-127 ~ 128)
