@@ -56,12 +56,12 @@ void setTargetDoorState(DoorState state) {
   targetDoorState.value.uint8_value = state;
   homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
   if (state == DOOR_STATE_OPEN) {
-    builtinLed.turnOn();
+    builtinLed.turnOn(); // warning
     if (currentDoorState.value.uint8_value != DOOR_STATE_OPEN) {
       emitDoorCommand(DOOR_COMMAND_OPEN);
     }
   } else if (state == DOOR_STATE_CLOSED) {
-    builtinLed.turnOff();
+    builtinLed.turnOff(); // safe
     if (currentDoorState.value.uint8_value != DOOR_STATE_CLOSED) {
       emitDoorCommand(DOOR_COMMAND_CLOSE);
     }
@@ -69,10 +69,6 @@ void setTargetDoorState(DoorState state) {
   console.log()
     .bracket(F("door"))
     .section(F("target"), toDoorStateName(state));
-}
-
-void targetDoorStateSetter(const homekit_value_t value) {
-  setTargetDoorState(DoorState(value.uint8_value));
 }
 
 void setCurrentDoorState(DoorState state, bool notify) {
@@ -130,17 +126,17 @@ void setup(void) {
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
     buttons.push_back({ .text = F("UnPair"),     .value = F("UnPair") });
-    buttons.push_back({ .text = F("Door-Close"), .value = F("Close") });
     buttons.push_back({ .text = F("Door-Open"),  .value = F("Open") });
+    buttons.push_back({ .text = F("Door-Close"), .value = F("Close") });
   };
   appMain->webPortal->onServicePost = [](const String& value) {
     if (value == F("UnPair")) {
       homekit_server_reset();
       ESP.restart();
-    } else if (value == F("Close")) {
-      setTargetDoorState(DOOR_STATE_CLOSED);
     } else if (value == F("Open")) {
       setTargetDoorState(DOOR_STATE_OPEN);
+    } else if (value == F("Close")) {
+      setTargetDoorState(DOOR_STATE_CLOSED);
     }
   };
 
@@ -157,7 +153,7 @@ void setup(void) {
   serialNumber = String(VICTOR_ACCESSORY_INFORMATION_SERIAL_NUMBER) + "/" + victorWifi.getHostId();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
   accessorySerialNumber.value.string_value = const_cast<char*>(serialNumber.c_str());
-  targetDoorState.setter = targetDoorStateSetter;
+  targetDoorState.setter = [](const homekit_value_t value) { setTargetDoorState(DoorState(value.uint8_value)); };
   arduino_homekit_setup(&serverConfig);
 
   // done
