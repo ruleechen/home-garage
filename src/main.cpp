@@ -21,7 +21,7 @@ AppMain* appMain;
 
 RCSwitch rf = RCSwitch();
 DoorSensor* doorSensor;
-uint16_t doorDebounce;
+uint16_t doorAutoStop;
 String hostName;
 String serialNumber;
 
@@ -83,8 +83,12 @@ void setCurrentDoorState(DoorState state, bool notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
     if (state == DOOR_STATE_OPEN || state == DOOR_STATE_CLOSED) {
-      delay(doorDebounce); // pause some time before emit stop command to wait for door really stopped
-      emitDoorCommand(DOOR_COMMAND_STOP);
+      if (doorAutoStop > 0) {
+        // pause some time before emit stop command to wait for door really stopped
+        if (doorAutoStop > 1) { delay(doorAutoStop); }
+        // emit stop command
+        emitDoorCommand(DOOR_COMMAND_STOP);
+      }
     }
   }
   console.log()
@@ -143,7 +147,7 @@ void setup(void) {
   // setup sensor
   const auto storage = new DoorStorage("/door.json");
   const auto setting = storage->load();
-  doorDebounce = setting.debounce;
+  doorAutoStop = setting.autoStop;
   doorSensor = new DoorSensor(setting);
   doorSensor->onStateChange = [](const DoorState state) { setCurrentDoorState(state, true); };
   setCurrentDoorState(doorSensor->readState(), false);

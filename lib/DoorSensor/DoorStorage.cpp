@@ -17,6 +17,7 @@ namespace Victor::Components {
     closedArr[1] = model.doorClosedTrueValue;
     // others
     doc[F("debounce")] = model.debounce;
+    doc[F("autoStop")] = model.autoStop;
   }
 
   void DoorStorage::_deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) {
@@ -30,6 +31,7 @@ namespace Victor::Components {
     model.doorClosedTrueValue = closedArr[1];
     // others
     model.debounce = doc[F("debounce")];
+    model.autoStop = doc[F("autoStop")];
   }
 
 } // namespace Victor::Components
