@@ -56,16 +56,15 @@ void emitDoorCommand(const DoorCommand command) {
 void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
   ESP.wdtFeed();
   targetDoorState.value.uint8_value = targetState;
+  builtinLed.flash();
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
   }
   if (targetState == TARGET_DOOR_STATE_OPEN) {
-    builtinLed.turnOn(); // warning
     if (currentDoorState.value.uint8_value != CURRENT_DOOR_STATE_OPEN) {
       emitDoorCommand(DOOR_COMMAND_OPEN);
     }
   } else if (targetState == TARGET_DOOR_STATE_CLOSED) {
-    builtinLed.turnOff(); // safe
     if (currentDoorState.value.uint8_value != CURRENT_DOOR_STATE_CLOSED) {
       emitDoorCommand(DOOR_COMMAND_CLOSE);
     }
@@ -80,8 +79,10 @@ void setCurrentDoorState(const CurrentDoorState currentState, const bool notify)
   currentDoorState.value.uint8_value = currentState;
   if (currentState == CURRENT_DOOR_STATE_OPEN || currentState == CURRENT_DOOR_STATE_OPENING) {
     targetDoorState.value.uint8_value = TARGET_DOOR_STATE_OPEN;
+    builtinLed.turnOn(); // warning
   } else if (currentState == CURRENT_DOOR_STATE_CLOSED || currentState == CURRENT_DOOR_STATE_CLOSING) {
     targetDoorState.value.uint8_value = TARGET_DOOR_STATE_CLOSED;
+    builtinLed.turnOff(); // safe
   }
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
