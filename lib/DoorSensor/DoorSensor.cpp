@@ -6,7 +6,7 @@ namespace Victor::Components {
     _openSensor = new DigitalInput(setting.doorOpenPin, setting.doorOpenTrueValue);
     _closedSensor = new DigitalInput(setting.doorClosedPin, setting.doorClosedTrueValue);
     _debounce = new IntervalOver(setting.debounce);
-    _lastState = readState();
+    _currentState = readState();
     // register interrupt
     attachInterrupt(digitalPinToInterrupt(setting.doorOpenPin), _interruptHandler, CHANGE);
     attachInterrupt(digitalPinToInterrupt(setting.doorClosedPin), _interruptHandler, CHANGE);
@@ -18,8 +18,8 @@ namespace Victor::Components {
       const auto now = millis();
       if (_debounce->isOver(now)) {
         const auto state = readState();
-        if (state != _lastState) {
-          _lastState = state;
+        if (state != _currentState) {
+          _currentState = state;
           _debounce->start(now);
           if (onStateChange != nullptr) {
             onStateChange(state);
@@ -29,17 +29,17 @@ namespace Victor::Components {
     }
   }
 
-  DoorState DoorSensor::readState() {
-    auto state = _lastState;
+  CurrentDoorState DoorSensor::readState() {
+    auto state = _currentState;
     if (_openSensor->getValue()) {
-      state = DOOR_STATE_OPEN;
+      state = CURRENT_DOOR_STATE_OPEN;
     } else if (_closedSensor->getValue()) {
-      state = DOOR_STATE_CLOSED;
+      state = CURRENT_DOOR_STATE_CLOSED;
     } else {
-      if (_lastState == DOOR_STATE_OPEN) {
-        state = DOOR_STATE_CLOSING;
-      } else if (_lastState == DOOR_STATE_CLOSED) {
-        state = DOOR_STATE_OPENING;
+      if (_currentState == CURRENT_DOOR_STATE_OPEN) {
+        state = CURRENT_DOOR_STATE_CLOSING;
+      } else if (_currentState == CURRENT_DOOR_STATE_CLOSED) {
+        state = CURRENT_DOOR_STATE_OPENING;
       }
     }
     return state;

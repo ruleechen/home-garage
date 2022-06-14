@@ -11,16 +11,16 @@ namespace Victor::Components {
    public:
     DoorSensor(DoorSetting setting);
     void loop();
-    DoorState readState();
+    CurrentDoorState readState();
     // events
-    typedef std::function<void(const DoorState state)> TStateHandler;
+    typedef std::function<void(const CurrentDoorState currentState)> TStateHandler;
     TStateHandler onStateChange = nullptr;
 
    private:
     DigitalInput* _openSensor = nullptr;
     DigitalInput* _closedSensor = nullptr;
     IntervalOver* _debounce = nullptr;
-    DoorState _lastState = DOOR_STATE_STOPPED;
+    CurrentDoorState _currentState = CURRENT_DOOR_STATE_STOPPED;
     // interrupt
     volatile static bool _hasChanges;
     static void IRAM_ATTR _interruptHandler();

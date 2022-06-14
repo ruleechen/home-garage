@@ -5,12 +5,19 @@
 
 namespace Victor {
 
-  enum DoorState {
-    DOOR_STATE_OPEN = 0,
-    DOOR_STATE_CLOSED = 1,
-    DOOR_STATE_OPENING = 2,
-    DOOR_STATE_CLOSING = 3,
-    DOOR_STATE_STOPPED = 4, // stopped not open or closed
+  // HAP section 9.118; 0 = opened, 1 = closed
+  enum TargetDoorState {
+    TARGET_DOOR_STATE_OPEN = 0,
+    TARGET_DOOR_STATE_CLOSED = 1,
+  };
+
+  // HAP section 9.30; 0 = opened, 1 = closed, 2 = opening, 3 = closing, 4 = stopped not open or closed
+  enum CurrentDoorState {
+    CURRENT_DOOR_STATE_OPEN = 0,
+    CURRENT_DOOR_STATE_CLOSED = 1,
+    CURRENT_DOOR_STATE_OPENING = 2,
+    CURRENT_DOOR_STATE_CLOSING = 3,
+    CURRENT_DOOR_STATE_STOPPED = 4,
   };
 
   enum DoorCommand {

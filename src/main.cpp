@@ -29,11 +29,11 @@ String serialNumber;
 
 String toDoorStateName(const uint8_t state) {
   return (
-    state == DOOR_STATE_OPEN ?    F("Open") :
-    state == DOOR_STATE_CLOSED ?  F("Closed") :
-    state == DOOR_STATE_OPENING ? F("Opening") :
-    state == DOOR_STATE_CLOSING ? F("Closing") :
-    state == DOOR_STATE_STOPPED ? F("Stopped") : F("Unknown")
+    state == 0 ? F("Open") :
+    state == 1 ? F("Closed") :
+    state == 2 ? F("Opening") :
+    state == 3 ? F("Closing") :
+    state == 4 ? F("Stopped") : F("Unknown")
   );
 }
 
@@ -53,41 +53,41 @@ void emitDoorCommand(const DoorCommand command) {
   }
 }
 
-void setTargetDoorState(const DoorState state, const bool notify) {
+void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
   ESP.wdtFeed();
-  targetDoorState.value.uint8_value = state;
+  targetDoorState.value.uint8_value = targetState;
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
   }
-  if (state == DOOR_STATE_OPEN) {
+  if (targetState == TARGET_DOOR_STATE_OPEN) {
     builtinLed.turnOn(); // warning
-    if (currentDoorState.value.uint8_value != DOOR_STATE_OPEN) {
+    if (currentDoorState.value.uint8_value != CURRENT_DOOR_STATE_OPEN) {
       emitDoorCommand(DOOR_COMMAND_OPEN);
     }
-  } else if (state == DOOR_STATE_CLOSED) {
+  } else if (targetState == TARGET_DOOR_STATE_CLOSED) {
     builtinLed.turnOff(); // safe
-    if (currentDoorState.value.uint8_value != DOOR_STATE_CLOSED) {
+    if (currentDoorState.value.uint8_value != CURRENT_DOOR_STATE_CLOSED) {
       emitDoorCommand(DOOR_COMMAND_CLOSE);
     }
   }
   console.log()
     .bracket(F("door"))
-    .section(F("target"), toDoorStateName(state));
+    .section(F("target"), toDoorStateName(targetState));
 }
 
-void setCurrentDoorState(const DoorState state, const bool notify) {
+void setCurrentDoorState(const CurrentDoorState currentState, const bool notify) {
   ESP.wdtFeed();
-  currentDoorState.value.uint8_value = state;
-  targetDoorState.value.uint8_value = (state == DOOR_STATE_OPEN || state == DOOR_STATE_OPENING)
-    ? DOOR_STATE_OPEN
-    : DOOR_STATE_CLOSED;
+  currentDoorState.value.uint8_value = currentState;
+  targetDoorState.value.uint8_value = (currentState == CURRENT_DOOR_STATE_OPEN || currentState == CURRENT_DOOR_STATE_OPENING)
+    ? TARGET_DOOR_STATE_OPEN
+    : TARGET_DOOR_STATE_CLOSED;
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
   }
   if (
-    state == DOOR_STATE_OPEN ||
-    state == DOOR_STATE_CLOSED
+    currentState == CURRENT_DOOR_STATE_OPEN ||
+    currentState == CURRENT_DOOR_STATE_CLOSED
   ) {
     if (doorAutoStop > 0) {
       // pause some time before emit stop command to wait for door really stopped
@@ -98,7 +98,7 @@ void setCurrentDoorState(const DoorState state, const bool notify) {
   }
   console.log()
     .bracket(F("door"))
-    .section(F("current"), toDoorStateName(state));
+    .section(F("current"), toDoorStateName(currentState));
 }
 
 void setup(void) {
@@ -143,9 +143,9 @@ void setup(void) {
       homekit_server_reset();
       ESP.restart();
     } else if (value == F("Open")) {
-      setTargetDoorState(DOOR_STATE_OPEN, connective);
+      setTargetDoorState(TARGET_DOOR_STATE_OPEN, connective);
     } else if (value == F("Close")) {
-      setTargetDoorState(DOOR_STATE_CLOSED, connective);
+      setTargetDoorState(TARGET_DOOR_STATE_CLOSED, connective);
     }
   };
 
@@ -154,7 +154,7 @@ void setup(void) {
   const auto setting = storage->load();
   doorAutoStop = setting.autoStop;
   doorSensor = new DoorSensor(setting);
-  doorSensor->onStateChange = [](const DoorState state) { setCurrentDoorState(state, connective); };
+  doorSensor->onStateChange = [](const CurrentDoorState currentState) { setCurrentDoorState(currentState, connective); };
   setCurrentDoorState(doorSensor->readState(), false);
 
   // setup homekit server
@@ -162,7 +162,7 @@ void setup(void) {
   serialNumber = String(VICTOR_ACCESSORY_INFORMATION_SERIAL_NUMBER) + "/" + victorWifi.getHostId();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
   accessorySerialNumber.value.string_value = const_cast<char*>(serialNumber.c_str());
-  targetDoorState.setter = [](const homekit_value_t value) { setTargetDoorState(DoorState(value.uint8_value), connective); };
+  targetDoorState.setter = [](const homekit_value_t value) { setTargetDoorState(TargetDoorState(value.uint8_value), connective); };
   arduino_homekit_setup(&serverConfig);
 
   // done
