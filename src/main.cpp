@@ -18,14 +18,16 @@ extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
 AppMain* appMain;
+bool connective;
 
 RCSwitch rf = RCSwitch();
 DoorSensor* doorSensor;
 uint16_t doorAutoStop;
+
 String hostName;
 String serialNumber;
 
-String toDoorStateName(uint8_t state) {
+String toDoorStateName(const uint8_t state) {
   return (
     state == DOOR_STATE_OPEN ?    F("Open") :
     state == DOOR_STATE_CLOSED ?  F("Closed") :
@@ -35,7 +37,7 @@ String toDoorStateName(uint8_t state) {
   );
 }
 
-void emitDoorCommand(DoorCommand command) {
+void emitDoorCommand(const DoorCommand command) {
   switch (command) {
     case DOOR_COMMAND_OPEN:
       appMain->radioPortal->emit(F("open"));
@@ -51,10 +53,12 @@ void emitDoorCommand(DoorCommand command) {
   }
 }
 
-void setTargetDoorState(DoorState state) {
+void setTargetDoorState(const DoorState state, const bool notify) {
   ESP.wdtFeed();
   targetDoorState.value.uint8_value = state;
-  homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
+  if (notify) {
+    homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
+  }
   if (state == DOOR_STATE_OPEN) {
     builtinLed.turnOn(); // warning
     if (currentDoorState.value.uint8_value != DOOR_STATE_OPEN) {
@@ -71,7 +75,7 @@ void setTargetDoorState(DoorState state) {
     .section(F("target"), toDoorStateName(state));
 }
 
-void setCurrentDoorState(DoorState state, bool notify) {
+void setCurrentDoorState(const DoorState state, const bool notify) {
   ESP.wdtFeed();
   currentDoorState.value.uint8_value = state;
   targetDoorState.value.uint8_value = (state == DOOR_STATE_OPEN || state == DOOR_STATE_OPENING)
@@ -139,9 +143,9 @@ void setup(void) {
       homekit_server_reset();
       ESP.restart();
     } else if (value == F("Open")) {
-      setTargetDoorState(DOOR_STATE_OPEN);
+      setTargetDoorState(DOOR_STATE_OPEN, connective);
     } else if (value == F("Close")) {
-      setTargetDoorState(DOOR_STATE_CLOSED);
+      setTargetDoorState(DOOR_STATE_CLOSED, connective);
     }
   };
 
@@ -150,7 +154,7 @@ void setup(void) {
   const auto setting = storage->load();
   doorAutoStop = setting.autoStop;
   doorSensor = new DoorSensor(setting);
-  doorSensor->onStateChange = [](const DoorState state) { setCurrentDoorState(state, true); };
+  doorSensor->onStateChange = [](const DoorState state) { setCurrentDoorState(state, connective); };
   setCurrentDoorState(doorSensor->readState(), false);
 
   // setup homekit server
@@ -158,7 +162,7 @@ void setup(void) {
   serialNumber = String(VICTOR_ACCESSORY_INFORMATION_SERIAL_NUMBER) + "/" + victorWifi.getHostId();
   accessoryName.value.string_value = const_cast<char*>(hostName.c_str());
   accessorySerialNumber.value.string_value = const_cast<char*>(serialNumber.c_str());
-  targetDoorState.setter = [](const homekit_value_t value) { setTargetDoorState(DoorState(value.uint8_value)); };
+  targetDoorState.setter = [](const homekit_value_t value) { setTargetDoorState(DoorState(value.uint8_value), connective); };
   arduino_homekit_setup(&serverConfig);
 
   // done
@@ -168,9 +172,11 @@ void setup(void) {
 }
 
 void loop(void) {
-  appMain->loop();
-  doorSensor->loop();
   arduino_homekit_loop();
+  const auto isPaired = arduino_homekit_get_running_server()->paired;
+  connective = victorWifi.isLightSleepMode() && isPaired;
+  appMain->loop(connective);
+  doorSensor->loop();
   // loop radio
   if (rf.available()) {
     const auto value = String(rf.getReceivedValue());
