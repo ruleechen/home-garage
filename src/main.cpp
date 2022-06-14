@@ -78,9 +78,11 @@ void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
 void setCurrentDoorState(const CurrentDoorState currentState, const bool notify) {
   ESP.wdtFeed();
   currentDoorState.value.uint8_value = currentState;
-  targetDoorState.value.uint8_value = (currentState == CURRENT_DOOR_STATE_OPEN || currentState == CURRENT_DOOR_STATE_OPENING)
-    ? TARGET_DOOR_STATE_OPEN
-    : TARGET_DOOR_STATE_CLOSED;
+  if (currentState == CURRENT_DOOR_STATE_OPEN || currentState == CURRENT_DOOR_STATE_OPENING) {
+    targetDoorState.value.uint8_value = TARGET_DOOR_STATE_OPEN;
+  } else if (currentState == CURRENT_DOOR_STATE_CLOSED || currentState == CURRENT_DOOR_STATE_CLOSING) {
+    targetDoorState.value.uint8_value = TARGET_DOOR_STATE_CLOSED;
+  }
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
@@ -95,6 +97,9 @@ void setCurrentDoorState(const CurrentDoorState currentState, const bool notify)
       // emit stop command
       emitDoorCommand(DOOR_COMMAND_STOP);
     }
+  } else if (currentState == CURRENT_DOOR_STATE_STOPPED) {
+    // stop directly
+    emitDoorCommand(DOOR_COMMAND_STOP);
   }
   console.log()
     .bracket(F("door"))
@@ -137,6 +142,7 @@ void setup(void) {
     buttons.push_back({ .text = F("UnPair"),     .value = F("UnPair") });
     buttons.push_back({ .text = F("Door-Open"),  .value = F("Open") });
     buttons.push_back({ .text = F("Door-Close"), .value = F("Close") });
+    buttons.push_back({ .text = F("Door-Stop"),  .value = F("Stop") });
   };
   appMain->webPortal->onServicePost = [](const String& value) {
     if (value == F("UnPair")) {
@@ -146,6 +152,8 @@ void setup(void) {
       setTargetDoorState(TARGET_DOOR_STATE_OPEN, connective);
     } else if (value == F("Close")) {
       setTargetDoorState(TARGET_DOOR_STATE_CLOSED, connective);
+    } else if (value == F("Stop")) {
+      setCurrentDoorState(CURRENT_DOOR_STATE_STOPPED, connective);
     }
   };
 
