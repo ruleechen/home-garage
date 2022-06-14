@@ -74,17 +74,22 @@ void setTargetDoorState(DoorState state) {
 void setCurrentDoorState(DoorState state, bool notify) {
   ESP.wdtFeed();
   currentDoorState.value.uint8_value = state;
-  targetDoorState.value.uint8_value = (state == DOOR_STATE_OPEN || state == DOOR_STATE_OPENING) ? DOOR_STATE_OPEN : DOOR_STATE_CLOSED;
+  targetDoorState.value.uint8_value = (state == DOOR_STATE_OPEN || state == DOOR_STATE_OPENING)
+    ? DOOR_STATE_OPEN
+    : DOOR_STATE_CLOSED;
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
     homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
-    if (state == DOOR_STATE_OPEN || state == DOOR_STATE_CLOSED) {
-      if (doorAutoStop > 0) {
-        // pause some time before emit stop command to wait for door really stopped
-        if (doorAutoStop > 1) { delay(doorAutoStop); }
-        // emit stop command
-        emitDoorCommand(DOOR_COMMAND_STOP);
-      }
+  }
+  if (
+    state == DOOR_STATE_OPEN ||
+    state == DOOR_STATE_CLOSED
+  ) {
+    if (doorAutoStop > 0) {
+      // pause some time before emit stop command to wait for door really stopped
+      if (doorAutoStop > 1) { delay(doorAutoStop); }
+      // emit stop command
+      emitDoorCommand(DOOR_COMMAND_STOP);
     }
   }
   console.log()
