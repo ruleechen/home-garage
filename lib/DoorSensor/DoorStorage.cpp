@@ -23,11 +23,11 @@ namespace Victor::Components {
   void DoorStorage::_deserializeFrom(DoorSetting& model, const DynamicJsonDocument& doc) {
     // door open
     const auto openArr = doc[F("open")];
-    model.doorOpenPin = openArr[0];
+    model.doorOpenPin       = openArr[0];
     model.doorOpenTrueValue = openArr[1];
     // door closed
     const auto closedArr = doc[F("closed")];
-    model.doorClosedPin = closedArr[0];
+    model.doorClosedPin       = closedArr[0];
     model.doorClosedTrueValue = closedArr[1];
     // others
     model.debounce = doc[F("debounce")];

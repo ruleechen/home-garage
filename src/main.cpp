@@ -17,12 +17,12 @@ extern "C" homekit_characteristic_t accessoryName;
 extern "C" homekit_characteristic_t accessorySerialNumber;
 extern "C" homekit_server_config_t serverConfig;
 
-AppMain* appMain;
-bool connective;
+AppMain* appMain = nullptr;
+bool connective = false;
 
 RCSwitch rf = RCSwitch();
-DoorSensor* doorSensor;
-uint16_t doorAutoStop;
+DoorSensor* doorSensor = nullptr;
+uint16_t doorAutoStop = 0;
 
 String hostName;
 String serialNumber;
