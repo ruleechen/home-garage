@@ -86,6 +86,7 @@ void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
 
 void setCurrentDoorState(const CurrentDoorState currentState, const bool notify) {
   ESP.wdtFeed();
+  const auto previousState = currentDoorState.value.uint8_value;
   if (
     currentState == CURRENT_DOOR_STATE_OPEN ||
     currentState == CURRENT_DOOR_STATE_OPENING
@@ -101,7 +102,10 @@ void setCurrentDoorState(const CurrentDoorState currentState, const bool notify)
     _homekitCurrentDoorState(currentState, notify);
     _homekitTargetDoorState(TARGET_DOOR_STATE_CLOSED, notify);
   } else if (
-    currentState == CURRENT_DOOR_STATE_STOPPED
+    currentState == CURRENT_DOOR_STATE_STOPPED &&
+    // only when door is not OPEN and CLOSED then we can stop it
+    previousState != CURRENT_DOOR_STATE_OPEN &&
+    previousState != CURRENT_DOOR_STATE_CLOSED
   ) {
     builtinLed.turnOn(); // warning
     _homekitCurrentDoorState(currentState, notify);
@@ -159,9 +163,9 @@ void setup(void) {
     states.push_back({ .text = F("Clients"),     .value = String(arduino_homekit_connected_clients_count()) });
     // buttons
     buttons.push_back({ .text = F("UnPair"),     .value = F("UnPair") });
-    buttons.push_back({ .text = F("Door-Open"),  .value = F("Open") });
-    buttons.push_back({ .text = F("Door-Close"), .value = F("Close") });
-    buttons.push_back({ .text = F("Door-Stop"),  .value = F("Stop") });
+    buttons.push_back({ .text = F("Door Open"),  .value = F("Open") });
+    buttons.push_back({ .text = F("Door Close"), .value = F("Close") });
+    buttons.push_back({ .text = F("Door Stop"),  .value = F("Stop") });
   };
   appMain->webPortal->onServicePost = [](const String& value) {
     if (value == F("UnPair")) {
