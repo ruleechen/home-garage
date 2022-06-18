@@ -53,13 +53,23 @@ void emitDoorCommand(const DoorCommand command) {
   }
 }
 
-void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
-  ESP.wdtFeed();
+void _homekitTargetDoorState(const TargetDoorState targetState, const bool notify) {
   targetDoorState.value.uint8_value = targetState;
-  builtinLed.flash();
   if (notify) {
     homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
   }
+}
+
+void _homekitCurrentDoorState(const CurrentDoorState currentState, const bool notify) {
+  currentDoorState.value.uint8_value = currentState;
+  if (notify) {
+    homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
+  }
+}
+
+void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
+  ESP.wdtFeed();
+  _homekitTargetDoorState(targetState, notify);
   if (targetState == TARGET_DOOR_STATE_OPEN) {
     if (currentDoorState.value.uint8_value != CURRENT_DOOR_STATE_OPEN) {
       emitDoorCommand(DOOR_COMMAND_OPEN);
@@ -76,18 +86,28 @@ void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
 
 void setCurrentDoorState(const CurrentDoorState currentState, const bool notify) {
   ESP.wdtFeed();
-  currentDoorState.value.uint8_value = currentState;
-  if (currentState == CURRENT_DOOR_STATE_OPEN || currentState == CURRENT_DOOR_STATE_OPENING) {
-    targetDoorState.value.uint8_value = TARGET_DOOR_STATE_OPEN;
+  if (
+    currentState == CURRENT_DOOR_STATE_OPEN ||
+    currentState == CURRENT_DOOR_STATE_OPENING
+  ) {
     builtinLed.turnOn(); // warning
-  } else if (currentState == CURRENT_DOOR_STATE_CLOSED || currentState == CURRENT_DOOR_STATE_CLOSING) {
-    targetDoorState.value.uint8_value = TARGET_DOOR_STATE_CLOSED;
+    _homekitCurrentDoorState(currentState, notify);
+    _homekitTargetDoorState(TARGET_DOOR_STATE_OPEN, notify);
+  } else if (
+    currentState == CURRENT_DOOR_STATE_CLOSED ||
+    currentState == CURRENT_DOOR_STATE_CLOSING
+  ) {
     builtinLed.turnOff(); // safe
+    _homekitCurrentDoorState(currentState, notify);
+    _homekitTargetDoorState(TARGET_DOOR_STATE_CLOSED, notify);
+  } else if (
+    currentState == CURRENT_DOOR_STATE_STOPPED
+  ) {
+    builtinLed.turnOn(); // warning
+    _homekitCurrentDoorState(currentState, notify);
+    emitDoorCommand(DOOR_COMMAND_STOP);
   }
-  if (notify) {
-    homekit_characteristic_notify(&targetDoorState, targetDoorState.value);
-    homekit_characteristic_notify(&currentDoorState, currentDoorState.value);
-  }
+  // auto stop
   if (
     currentState == CURRENT_DOOR_STATE_OPEN ||
     currentState == CURRENT_DOOR_STATE_CLOSED
@@ -98,10 +118,8 @@ void setCurrentDoorState(const CurrentDoorState currentState, const bool notify)
       // emit stop command
       emitDoorCommand(DOOR_COMMAND_STOP);
     }
-  } else if (currentState == CURRENT_DOOR_STATE_STOPPED) {
-    // stop directly
-    emitDoorCommand(DOOR_COMMAND_STOP);
   }
+  // log
   console.log()
     .bracket(F("door"))
     .section(F("current"), toDoorStateName(currentState));
