@@ -38,6 +38,7 @@ String toDoorStateName(const uint8_t state) {
 }
 
 void emitDoorCommand(const DoorCommand command) {
+  ESP.wdtFeed();
   switch (command) {
     case DOOR_COMMAND_OPEN:
       appMain->radioPortal->emit(F("open"));
@@ -68,7 +69,6 @@ void _homekitCurrentDoorState(const CurrentDoorState currentState, const bool no
 }
 
 void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
-  ESP.wdtFeed();
   _homekitTargetDoorState(targetState, notify);
   if (targetState == TARGET_DOOR_STATE_OPEN) {
     if (currentDoorState.value.uint8_value != CURRENT_DOOR_STATE_OPEN) {
@@ -85,21 +85,17 @@ void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
 }
 
 void setCurrentDoorState(const CurrentDoorState currentState, const bool notify) {
-  ESP.wdtFeed();
   const auto previousState = currentDoorState.value.uint8_value;
+  _homekitCurrentDoorState(currentState, notify);
   if (
     currentState == CURRENT_DOOR_STATE_OPEN ||
     currentState == CURRENT_DOOR_STATE_OPENING
   ) {
-    builtinLed.turnOn(); // warning
-    _homekitCurrentDoorState(currentState, notify);
     _homekitTargetDoorState(TARGET_DOOR_STATE_OPEN, notify);
   } else if (
     currentState == CURRENT_DOOR_STATE_CLOSED ||
     currentState == CURRENT_DOOR_STATE_CLOSING
   ) {
-    builtinLed.turnOff(); // safe
-    _homekitCurrentDoorState(currentState, notify);
     _homekitTargetDoorState(TARGET_DOOR_STATE_CLOSED, notify);
   } else if (
     currentState == CURRENT_DOOR_STATE_STOPPED &&
@@ -107,8 +103,6 @@ void setCurrentDoorState(const CurrentDoorState currentState, const bool notify)
     previousState != CURRENT_DOOR_STATE_OPEN &&
     previousState != CURRENT_DOOR_STATE_CLOSED
   ) {
-    builtinLed.turnOn(); // warning
-    _homekitCurrentDoorState(currentState, notify);
     emitDoorCommand(DOOR_COMMAND_STOP);
   }
   // auto stop
@@ -122,6 +116,12 @@ void setCurrentDoorState(const CurrentDoorState currentState, const bool notify)
       // emit stop command
       emitDoorCommand(DOOR_COMMAND_STOP);
     }
+  }
+  // led
+  if (currentState == CURRENT_DOOR_STATE_CLOSED) {
+    builtinLed.turnOff(); // safe
+  } else {
+    builtinLed.turnOn(); // warn
   }
   // log
   console.log()
