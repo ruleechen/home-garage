@@ -69,8 +69,10 @@ void _homekitCurrentDoorState(const CurrentDoorState currentState, const bool no
 }
 
 void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
+  // update target state
   const auto currentState = CurrentDoorState(currentDoorState.value.uint8_value);
   _homekitTargetDoorState(targetState, notify);
+  // emit radio
   if (targetState == TARGET_DOOR_STATE_OPEN) {
     if (currentState != CURRENT_DOOR_STATE_OPEN) {
       emitDoorCommand(DOOR_COMMAND_OPEN);
@@ -80,14 +82,25 @@ void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
       emitDoorCommand(DOOR_COMMAND_CLOSE);
     }
   }
+  // adjust current state
+  if (currentState == CURRENT_DOOR_STATE_STOPPED) {
+    if (targetState == TARGET_DOOR_STATE_OPEN) {
+      _homekitCurrentDoorState(CURRENT_DOOR_STATE_OPENING, notify);
+    } else if (targetState == TARGET_DOOR_STATE_CLOSED) {
+      _homekitCurrentDoorState(CURRENT_DOOR_STATE_CLOSING, notify);
+    }
+  }
+  // log
   console.log()
     .bracket(F("door"))
     .section(F("target"), toDoorStateName(targetState));
 }
 
 void setCurrentDoorState(const CurrentDoorState newState, const bool notify) {
+  // update current state
   const auto currentState = CurrentDoorState(currentDoorState.value.uint8_value);
   _homekitCurrentDoorState(newState, notify);
+  // adjust target state
   if (
     newState == CURRENT_DOOR_STATE_OPEN ||
     newState == CURRENT_DOOR_STATE_OPENING
