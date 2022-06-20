@@ -69,13 +69,14 @@ void _homekitCurrentDoorState(const CurrentDoorState currentState, const bool no
 }
 
 void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
+  const auto currentState = CurrentDoorState(currentDoorState.value.uint8_value);
   _homekitTargetDoorState(targetState, notify);
   if (targetState == TARGET_DOOR_STATE_OPEN) {
-    if (currentDoorState.value.uint8_value != CURRENT_DOOR_STATE_OPEN) {
+    if (currentState != CURRENT_DOOR_STATE_OPEN) {
       emitDoorCommand(DOOR_COMMAND_OPEN);
     }
   } else if (targetState == TARGET_DOOR_STATE_CLOSED) {
-    if (currentDoorState.value.uint8_value != CURRENT_DOOR_STATE_CLOSED) {
+    if (currentState != CURRENT_DOOR_STATE_CLOSED) {
       emitDoorCommand(DOOR_COMMAND_CLOSE);
     }
   }
@@ -84,31 +85,31 @@ void setTargetDoorState(const TargetDoorState targetState, const bool notify) {
     .section(F("target"), toDoorStateName(targetState));
 }
 
-void setCurrentDoorState(const CurrentDoorState currentState, const bool notify) {
-  const auto previousState = currentDoorState.value.uint8_value;
-  _homekitCurrentDoorState(currentState, notify);
+void setCurrentDoorState(const CurrentDoorState newState, const bool notify) {
+  const auto currentState = CurrentDoorState(currentDoorState.value.uint8_value);
+  _homekitCurrentDoorState(newState, notify);
   if (
-    currentState == CURRENT_DOOR_STATE_OPEN ||
-    currentState == CURRENT_DOOR_STATE_OPENING
+    newState == CURRENT_DOOR_STATE_OPEN ||
+    newState == CURRENT_DOOR_STATE_OPENING
   ) {
     _homekitTargetDoorState(TARGET_DOOR_STATE_OPEN, notify);
   } else if (
-    currentState == CURRENT_DOOR_STATE_CLOSED ||
-    currentState == CURRENT_DOOR_STATE_CLOSING
+    newState == CURRENT_DOOR_STATE_CLOSED ||
+    newState == CURRENT_DOOR_STATE_CLOSING
   ) {
     _homekitTargetDoorState(TARGET_DOOR_STATE_CLOSED, notify);
   } else if (
-    currentState == CURRENT_DOOR_STATE_STOPPED &&
+    newState == CURRENT_DOOR_STATE_STOPPED &&
     // only when door is not OPEN and CLOSED then we can stop it
-    previousState != CURRENT_DOOR_STATE_OPEN &&
-    previousState != CURRENT_DOOR_STATE_CLOSED
+    currentState != CURRENT_DOOR_STATE_OPEN &&
+    currentState != CURRENT_DOOR_STATE_CLOSED
   ) {
     emitDoorCommand(DOOR_COMMAND_STOP);
   }
   // auto stop
   if (
-    currentState == CURRENT_DOOR_STATE_OPEN ||
-    currentState == CURRENT_DOOR_STATE_CLOSED
+    newState == CURRENT_DOOR_STATE_OPEN ||
+    newState == CURRENT_DOOR_STATE_CLOSED
   ) {
     if (doorAutoStop > 0) {
       // pause some time before emit stop command to wait for door really stopped
@@ -118,7 +119,7 @@ void setCurrentDoorState(const CurrentDoorState currentState, const bool notify)
     }
   }
   // led
-  if (currentState == CURRENT_DOOR_STATE_CLOSED) {
+  if (newState == CURRENT_DOOR_STATE_CLOSED) {
     builtinLed.turnOff(); // safe
   } else {
     builtinLed.turnOn(); // warn
@@ -126,7 +127,7 @@ void setCurrentDoorState(const CurrentDoorState currentState, const bool notify)
   // log
   console.log()
     .bracket(F("door"))
-    .section(F("current"), toDoorStateName(currentState));
+    .section(F("current"), toDoorStateName(newState));
 }
 
 void setup(void) {
