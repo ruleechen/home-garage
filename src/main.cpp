@@ -99,12 +99,16 @@ void setCurrentDoorState(const CurrentDoorState newState, const bool notify) {
   ) {
     _homekitTargetDoorState(TARGET_DOOR_STATE_CLOSED, notify);
   } else if (
-    newState == CURRENT_DOOR_STATE_STOPPED &&
-    // only when door is not OPEN and CLOSED then we can stop it
-    currentState != CURRENT_DOOR_STATE_OPEN &&
-    currentState != CURRENT_DOOR_STATE_CLOSED
+    newState == CURRENT_DOOR_STATE_STOPPED
   ) {
-    emitDoorCommand(DOOR_COMMAND_STOP);
+    _homekitTargetDoorState(TARGET_DOOR_STATE_OPEN, notify);
+    // only when door is not OPEN and CLOSED then we can stop it
+    if (
+      currentState != CURRENT_DOOR_STATE_OPEN &&
+      currentState != CURRENT_DOOR_STATE_CLOSED
+    ) {
+      emitDoorCommand(DOOR_COMMAND_STOP);
+    }
   }
   // auto stop
   if (
