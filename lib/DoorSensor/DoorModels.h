@@ -30,27 +30,27 @@ namespace Victor {
     // door open sensor input
     // 0~128 = gpio
     //    -1 = disabled
-    int8_t doorOpenPin = -1; // (-127 ~ 128)
+    int8_t doorOpenPin = -1; // (-128~127)
     // 0 = LOW
     // 1 = HIGH
-    uint8_t doorOpenTrueValue = 0; // (0 ~ 256) LOW
+    uint8_t doorOpenTrueValue = 0; // (0~255) LOW
 
     // door closed sensor input
     // 0~128 = gpio
     //    -1 = disabled
-    int8_t doorClosedPin = -1; // (-127 ~ 128)
+    int8_t doorClosedPin = -1; // (-128~127)
     // 0 = LOW
     // 1 = HIGH
-    uint8_t doorClosedTrueValue = 0; // (0 ~ 256) LOW
+    uint8_t doorClosedTrueValue = 0; // (0~255) LOW
 
     // ms debounce time to avoid fast changes
-    uint16_t debounce = 0; // (0 ~ 65535)
+    uint16_t debounce = 0; // (0~65535)
 
     // auto stop
     //         0 = disabled
     //         1 = enabled
     // 2 ~ 65535 = ms time delay before emit stop command
-    uint16_t autoStop = 0; // (0 ~ 65535)
+    uint16_t autoStop = 0; // (0~65535)
   };
 
 } // namespace Victor
