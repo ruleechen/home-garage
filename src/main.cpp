@@ -153,21 +153,21 @@ void setup(void) {
 
   // setup radio
   const auto radioJson = radioStorage.load();
-  if (radioJson.inputPin > 0) {
-    rf.enableReceive(radioJson.inputPin);
+  if (radioJson->inputPin > 0) {
+    rf.enableReceive(radioJson->inputPin);
   }
-  if (radioJson.outputPin > 0) {
-    rf.enableTransmit(radioJson.outputPin);
+  if (radioJson->outputPin > 0) {
+    rf.enableTransmit(radioJson->outputPin);
   }
-  appMain->radioPortal->onEmit = [](const RadioEmit& emit) {
-    const auto value = emit.value.toInt();
-    rf.setProtocol(emit.channel);
+  appMain->radioPortal->onEmit = [](const RadioEmit* emit) {
+    const auto value = emit->value.toInt();
+    rf.setProtocol(emit->channel);
     rf.send(value, 24);
     builtinLed.flash();
     console.log()
       .bracket(F("radio"))
-      .section(F("sent"), emit.value)
-      .section(F("via channel"), String(emit.channel));
+      .section(F("sent"), emit->value)
+      .section(F("via channel"), String(emit->channel));
   };
 
   // setup web
@@ -201,7 +201,7 @@ void setup(void) {
   // setup sensor
   const auto storage = new DoorStorage("/door.json");
   const auto setting = storage->load();
-  doorAutoStop = setting.autoStop;
+  doorAutoStop = setting->autoStop;
   doorSensor = new DoorSensor(setting);
   doorSensor->onStateChange = [](const CurrentDoorState currentState) { setCurrentDoorState(currentState, connective); };
   setCurrentDoorState(doorSensor->readState(), false);
