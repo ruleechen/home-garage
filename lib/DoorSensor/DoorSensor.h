@@ -10,6 +10,7 @@ namespace Victor::Components {
   class DoorSensor {
    public:
     DoorSensor(DoorSetting* setting);
+    ~DoorSensor();
     void loop();
     CurrentDoorState readState();
     // events

@@ -12,6 +12,25 @@ namespace Victor::Components {
     attachInterrupt(digitalPinToInterrupt(setting->doorClosedPin), _interruptHandler, CHANGE);
   }
 
+  DoorSensor::~DoorSensor() {
+    if (_openSensor != nullptr) {
+      delete _openSensor;
+      _openSensor = nullptr;
+    }
+    if (_closedSensor != nullptr) {
+      delete _closedSensor;
+      _closedSensor = nullptr;
+    }
+    if (_debounce != nullptr) {
+      free(_debounce);
+      _debounce = nullptr;
+    }
+    onStateChange = nullptr;
+    // unregister interrupt
+    // detachInterrupt(digitalPinToInterrupt(1));
+    // detachInterrupt(digitalPinToInterrupt(2));
+  }
+
   void DoorSensor::loop() {
     if (_hasChanges) {
       _hasChanges = false;
